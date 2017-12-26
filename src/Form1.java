@@ -1,13 +1,19 @@
 import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollBar;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 public class Form1 {
 
@@ -38,18 +44,67 @@ public class Form1 {
   private JButton loadTableButton;
   private JButton saveTableButton;
   private JTextField a0TextField;
+  private JButton cancelButton;
+  private JButton acceptButton;
+  private JCheckBox lowerCaseABCheckBox;
+  private JCheckBox UPPERCASEABCheckBox;
+  private JCheckBox digits012CheckBox;
+  private JSpinner spinner2;
+  private JCheckBox commercialAtCheckBox;
+  private JCheckBox dollarSign$CheckBox;
+  private JCheckBox dotCheckBox;
+  private JCheckBox underscore_CheckBox;
+  private JCheckBox bracesCheckBox;
+  private JButton loadPresetButton1;
+  private JButton savePresetButton1;
+  private JCheckBox specialCheckBox;
+  private JEditorPane editorPane1;
 
   public Form1() {
+
+    nextButton2.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+    nextButton.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+
     prevButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).previous(panelMain);
           }
         });
-    nextButton2.addActionListener(
+    backButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
-            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            ((CardLayout) panelMain.getLayout()).previous(panelMain);
+          }
+        });
+
+    addButton.addActionListener(
+        e -> {
+          if (cardAlphabet.getLayout() instanceof CardLayout) {
+            ((CardLayout) cardAlphabet.getLayout()).next(cardAlphabet);
+          }
+        });
+
+    cancelButton.addActionListener(
+        e -> {
+          if (cardAlphabet.getLayout() instanceof CardLayout) {
+            ((CardLayout) cardAlphabet.getLayout()).previous(cardAlphabet);
+          }
+        });
+    acceptButton.addActionListener(
+        e -> {
+          if (cardAlphabet.getLayout() instanceof CardLayout) {
+            ((CardLayout) cardAlphabet.getLayout()).previous(cardAlphabet);
           }
         });
   }
