@@ -1,61 +1,60 @@
 import java.awt.CardLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 public class Form1 {
 
-  private JPanel panelMain;
-  private JPanel cardAlphabet;
-  private JPanel cardLength;
-  private JButton caNextButton;
-  private JButton prevButton;
-  private JButton clNextButton;
-  private JPanel Card3;
-  private JButton fromTextButton;
-  private JButton fromDicesButton;
-  private JButton fromBinaryButton;
-  private JButton backButton;
-  private JButton nextButton1;
-  private JProgressBar progressBar1;
-  private JButton removeButton1;
-  private JList list2;
-  private JPanel cardViewChars;
-  private JButton addButton;
-  private JButton editButton;
-  private JButton removeButton;
-  private JButton caBackButton;
-  private JTable table1;
-  private JPanel cardAddChars;
-  private JPanel cardEditChars;
-  private JButton loadTableButton;
-  private JButton saveTableButton;
   private JTextField a0TextField;
-  private JButton cancelButton;
   private JButton acceptButton;
+  private JButton addButton;
+  private JButton caBackButton;
+  private JButton cancelButton;
+  private JButton caNextButton;
+  private JPanel cardAlphabet;
+  private JPanel cardPresetChars;
+  private JPanel cardEntropy;
+  private JPanel cardLength;
+  private JPanel cardViewChars;
+  private JButton ceBackButton;
+  private JButton clBackButton;
+  private JButton clNextButton;
+  private JButton editButton;
+  private JButton getMyPasswordButton;
+  private JButton loadTableButton;
+  private JPanel panelMain;
+  private JProgressBar progressBar1;
+  private JSpinner pwdLenSpinner;
+  private JButton removeButton;
+  private JButton saveTableButton;
+  private JTable table1;
+  private JButton addButton1;
+  private JButton editButton1;
+  private JButton removeButton1;
+  private JTable table2;
+  private JButton loadPresetButton;
+  private JButton savePresetButton;
+  private JSpinner spinner1;
   private JCheckBox lowerCaseABCheckBox;
   private JCheckBox UPPERCASEABCheckBox;
   private JCheckBox digits012CheckBox;
-  private JSpinner spinner2;
   private JCheckBox commercialAtCheckBox;
-  private JCheckBox dollarSign$CheckBox;
-  private JCheckBox dotCheckBox;
   private JCheckBox underscore_CheckBox;
+  private JCheckBox dollarSign$CheckBox;
   private JCheckBox bracesCheckBox;
-  private JButton loadPresetButton1;
-  private JButton savePresetButton1;
+  private JCheckBox dotCheckBox;
   private JCheckBox specialCheckBox;
-  private JEditorPane editorPane1;
   private JCheckBox customSetCheckBox;
-  private JButton clBackButton;
-  private JSpinner spinner1;
+  private JTextPane textPane1;
 
   public Form1() {
 
@@ -78,7 +77,7 @@ public class Form1 {
             ((CardLayout) panelMain.getLayout()).previous(panelMain);
           }
         });
-    backButton.addActionListener(
+    ceBackButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).previous(panelMain);
@@ -111,6 +110,7 @@ public class Form1 {
     frame.setContentPane(new Form1().panelMain);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.pack();
+    frame.setSize(frame.getWidth(), 410);
     frame.setVisible(true);
   }
 }
