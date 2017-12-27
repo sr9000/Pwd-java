@@ -1,4 +1,6 @@
 import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.JButton;
@@ -7,6 +9,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -55,6 +58,13 @@ public class Form1 {
   private JCheckBox specialCheckBox;
   private JCheckBox customSetCheckBox;
   private JTextPane textPane1;
+  private JPanel cardAddEntropy;
+  private JPanel cardSelectEntropy;
+  private JButton nextButton;
+  private JButton backButton;
+  private JRadioButton textBasedEntropyRadioButton;
+  private JRadioButton pregeneratedRandomBinaryDataRadioButton;
+  private JRadioButton diceRollEntropyRadioButton;
 
   public Form1() {
 
@@ -101,6 +111,19 @@ public class Form1 {
         e -> {
           if (cardAlphabet.getLayout() instanceof CardLayout) {
             ((CardLayout) cardAlphabet.getLayout()).previous(cardAlphabet);
+          }
+        });
+
+    addButton1.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+    backButton.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).previous(panelMain);
           }
         });
   }
