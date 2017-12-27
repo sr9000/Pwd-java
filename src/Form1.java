@@ -1,6 +1,4 @@
 import java.awt.CardLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
@@ -8,22 +6,18 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollBar;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 
 public class Form1 {
 
   private JPanel panelMain;
   private JPanel cardAlphabet;
-  private JPanel Card2;
-  private JButton nextButton;
+  private JPanel cardLength;
+  private JButton caNextButton;
   private JButton prevButton;
-  private JSpinner spinner1;
-  private JButton nextButton2;
+  private JButton clNextButton;
   private JPanel Card3;
   private JButton fromTextButton;
   private JButton fromDicesButton;
@@ -37,7 +31,7 @@ public class Form1 {
   private JButton addButton;
   private JButton editButton;
   private JButton removeButton;
-  private JButton backButton1;
+  private JButton caBackButton;
   private JTable table1;
   private JPanel cardAddChars;
   private JPanel cardEditChars;
@@ -59,23 +53,26 @@ public class Form1 {
   private JButton savePresetButton1;
   private JCheckBox specialCheckBox;
   private JEditorPane editorPane1;
+  private JCheckBox customSetCheckBox;
+  private JButton clBackButton;
+  private JSpinner spinner1;
 
   public Form1() {
 
-    nextButton2.addActionListener(
+    caNextButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
           }
         });
-    nextButton.addActionListener(
+    clNextButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
           }
         });
 
-    prevButton.addActionListener(
+    clBackButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).previous(panelMain);
