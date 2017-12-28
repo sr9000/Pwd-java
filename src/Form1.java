@@ -6,6 +6,7 @@ import java.awt.event.ComponentEvent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -62,9 +63,27 @@ public class Form1 {
   private JPanel cardSelectEntropy;
   private JButton nextButton;
   private JButton backButton;
-  private JRadioButton textBasedEntropyRadioButton;
   private JRadioButton pregeneratedRandomBinaryDataRadioButton;
   private JRadioButton diceRollEntropyRadioButton;
+  private JPanel cardDices;
+  private JButton cancelButton1;
+  private JButton backButton1;
+  private JButton acceptButton1;
+  private JSpinner spinner2;
+  private JTextPane textPane2;
+  private JPanel cardText;
+  private JButton cancelButton2;
+  private JButton backButton2;
+  private JButton acceptButton2;
+  private JTextPane textPane3;
+  private JPanel cardBinary;
+  private JButton cancelButton3;
+  private JButton backButton3;
+  private JButton acceptButton3;
+  private JTextPane textPane4;
+  private JButton button1;
+  private JTextField textField1;
+  private JRadioButton textBasedEntropyRadioButton;
 
   public Form1() {
 
@@ -119,12 +138,100 @@ public class Form1 {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
           }
+          if (cardAddEntropy.getLayout() instanceof CardLayout) {
+            ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
+          }
         });
     backButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).previous(panelMain);
           }
+        });
+
+    cancelButton1.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).first(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+    backButton1.addActionListener(
+        e -> {
+          if (cardAddEntropy.getLayout() instanceof CardLayout) {
+            ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
+          }
+        });
+    acceptButton1.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).first(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+
+    cancelButton2.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).first(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+    backButton2.addActionListener(
+        e -> {
+          if (cardAddEntropy.getLayout() instanceof CardLayout) {
+            ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
+          }
+        });
+    acceptButton2.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).first(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+
+    cancelButton3.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).first(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+    backButton3.addActionListener(
+        e -> {
+          if (cardAddEntropy.getLayout() instanceof CardLayout) {
+            ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
+          }
+        });
+    acceptButton3.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).first(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            ((CardLayout) panelMain.getLayout()).next(panelMain);
+          }
+        });
+
+    nextButton.addActionListener(
+        e -> {
+          if (!(cardAddEntropy.getLayout() instanceof CardLayout)) {
+            return;
+          }
+          ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
+          if (diceRollEntropyRadioButton.isSelected()) {
+            return;
+          }
+          ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
+          if (textBasedEntropyRadioButton.isSelected()) {
+            return;
+          }
+          ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
         });
   }
 
