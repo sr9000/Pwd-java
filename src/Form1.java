@@ -9,6 +9,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
@@ -48,12 +49,12 @@ public class Form1 {
   private JButton loadPresetButton;
   private JButton savePresetButton;
   private JSpinner spinner1;
-  private JCheckBox lowerCaseABCheckBox;
-  private JCheckBox UPPERCASEABCheckBox;
-  private JCheckBox digits012CheckBox;
+  private JCheckBox lowerCaseLettersCheckBox;
+  private JCheckBox upperCaseLettersCheckBox;
+  private JCheckBox digitsCheckBox;
   private JCheckBox commercialAtCheckBox;
-  private JCheckBox underscore_CheckBox;
-  private JCheckBox dollarSign$CheckBox;
+  private JCheckBox underscoreCheckBox;
+  private JCheckBox dollarSignCheckBox;
   private JCheckBox bracesCheckBox;
   private JCheckBox dotCheckBox;
   private JCheckBox specialCheckBox;
@@ -84,6 +85,16 @@ public class Form1 {
   private JButton button1;
   private JTextField textField1;
   private JRadioButton textBasedEntropyRadioButton;
+  private JPanel cardGetPassword;
+  private JButton copyToClipboardButton;
+  private JButton saveAsFileButton;
+  private JButton generateNewPasswordButton;
+  private JCheckBox viewPasswordCheckBox;
+  private JTextPane textPane5;
+  private JCheckBox encodeWithBase64CheckBox;
+  private JCheckBox encryptionAES256CheckBox;
+  private JPasswordField passwordField1;
+  private JPasswordField passwordField2;
 
   public Form1() {
 
@@ -232,6 +243,19 @@ public class Form1 {
             return;
           }
           ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
+        });
+
+    getMyPasswordButton.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).last(panelMain);
+          }
+        });
+    generateNewPasswordButton.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            ((CardLayout) panelMain.getLayout()).first(panelMain);
+          }
         });
   }
 
