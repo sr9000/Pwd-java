@@ -1,15 +1,16 @@
-import com.sun.deploy.util.ArrayUtil;
 import configuration.PresetChars;
 import java.awt.CardLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -21,7 +22,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.event.TableModelEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 
 public class Form1 {
 
@@ -223,12 +228,13 @@ public class Form1 {
             if (presetChars.isValid()) {
               if (EditableRow == null) {
                 ((DefaultTableModel) (tableCharacterSets.getModel()))
-                    .addRow(new Object[] {presetChars, presetChars.minimalOccurences()});
+                    .addRow(new Object[] {presetChars, presetChars.getMinimalOccurences()});
               } else {
                 ((DefaultTableModel) (tableCharacterSets.getModel())).removeRow(EditableRow);
                 ((DefaultTableModel) (tableCharacterSets.getModel()))
                     .insertRow(
-                        EditableRow, new Object[] {presetChars, presetChars.minimalOccurences()});
+                        EditableRow,
+                        new Object[] {presetChars, presetChars.getMinimalOccurences()});
                 EditableRow = null;
               }
               ((CardLayout) cardAlphabet.getLayout()).previous(cardAlphabet);
@@ -236,6 +242,22 @@ public class Form1 {
               JOptionPane.showMessageDialog(panelMain, "Character set filled incorrectly!");
             }
           }
+        });
+    savePresetButton.addActionListener(
+        e -> {
+          PresetChars presetChars = new PresetChars();
+
+          AssignPresetChars(presetChars);
+
+          if (presetChars.isValid()) {
+            generalSaver(", when saving preset...", presetChars, PresetChars.class);
+          } else {
+            JOptionPane.showMessageDialog(panelMain, "Character set filled incorrectly!");
+          }
+        });
+    loadPresetButton.addActionListener(
+        e -> {
+          generalLoader(", when loading preset...", this::ClonePresetChars, PresetChars.class);
         });
 
     addButton1.addActionListener(
@@ -387,6 +409,85 @@ public class Form1 {
             });
   }
 
+  private <T> void generalLoader(
+      String callerId, Consumer<T> process, Class<T> classOfObjectToLoad) {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Specify a file to load");
+    FileNameExtensionFilter filter = new FileNameExtensionFilter("XML FILES", "xml", "XML");
+    fileChooser.setFileFilter(filter);
+
+    int userSelection = fileChooser.showSaveDialog(panelMain);
+
+    if (userSelection == JFileChooser.APPROVE_OPTION) {
+      File fileToLoad = fileChooser.getSelectedFile();
+      if (fileToLoad.exists() && !fileToLoad.isFile()) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            "You should specify true file (not directory or something else)!",
+            "Error" + callerId,
+            JOptionPane.ERROR_MESSAGE);
+      } else if (!fileToLoad.getName().toLowerCase().endsWith(".xml")) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            "You should specify \".xml\" extension manually!",
+            "Error" + callerId,
+            JOptionPane.ERROR_MESSAGE);
+      } else if (!fileToLoad.exists()) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            "File should exist to be loaded!",
+            "Error" + callerId,
+            JOptionPane.ERROR_MESSAGE);
+      } else {
+        try {
+          JAXBContext jaxbContext = JAXBContext.newInstance(classOfObjectToLoad);
+          T objToLoad = (T) jaxbContext.createUnmarshaller().unmarshal(fileToLoad);
+          process.accept(objToLoad);
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(
+              panelMain, ex.toString(), "Exception" + callerId, JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }
+
+  private <T> void generalSaver(String callerId, T objToSave, Class<T> classOfObjectToSave) {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Specify a file to save");
+    FileNameExtensionFilter filter = new FileNameExtensionFilter("XML FILES", "xml", "XML");
+    fileChooser.setFileFilter(filter);
+
+    int userSelection = fileChooser.showSaveDialog(panelMain);
+
+    if (userSelection == JFileChooser.APPROVE_OPTION) {
+      File fileToSave = fileChooser.getSelectedFile();
+      if (fileToSave.exists() && !fileToSave.isFile()) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            "You should specify true file (not directory or something else)!",
+            "Error" + callerId,
+            JOptionPane.ERROR_MESSAGE);
+      } else if (!fileToSave.getName().toLowerCase().endsWith(".xml")) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            "You should specify \".xml\" extension manually!",
+            "Error" + callerId,
+            JOptionPane.ERROR_MESSAGE);
+      } else {
+        try {
+          JAXBContext jaxbContext = JAXBContext.newInstance(classOfObjectToSave);
+          JAXBElement jaxbElement =
+              new JAXBElement<>(new QName("root"), classOfObjectToSave, objToSave);
+          boolean ignoredBoolean = fileToSave.createNewFile();
+          jaxbContext.createMarshaller().marshal(jaxbElement, fileToSave);
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(
+              panelMain, ex.toString(), "Exception" + callerId, JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }
+
   private void AssignPresetChars(PresetChars presetChars) {
     presetChars.setBracesCheckBox(bracesCheckBox);
     presetChars.setCommercialAtCheckBox(commercialAtCheckBox);
@@ -403,22 +504,22 @@ public class Form1 {
   }
 
   private void ClonePresetChars(PresetChars presetChars) {
-    bracesCheckBox.setSelected(presetChars.bracesCheckBox());
-    commercialAtCheckBox.setSelected(presetChars.commercialAtCheckBox());
-    customSetCheckBox.setSelected(presetChars.customCharactersCheckBox());
-    digitsCheckBox.setSelected(presetChars.digitsCheckBox());
-    dollarSignCheckBox.setSelected(presetChars.dollarSignCheckBox());
-    dotCheckBox.setSelected(presetChars.dotCheckBox());
-    lowerCaseLettersCheckBox.setSelected(presetChars.lowerCaseLettersCheckBox());
-    specialCheckBox.setSelected(presetChars.specialCheckBox());
-    underscoreCheckBox.setSelected(presetChars.underscoreCheckBox());
-    upperCaseLettersCheckBox.setSelected(presetChars.upperCaseLettersCheckBox());
-    minimalOccurences.setValue(presetChars.minimalOccurences());
+    bracesCheckBox.setSelected(presetChars.getBracesCheckBox());
+    commercialAtCheckBox.setSelected(presetChars.getCommercialAtCheckBox());
+    customSetCheckBox.setSelected(presetChars.getCustomCharactersCheckBox());
+    digitsCheckBox.setSelected(presetChars.getDigitsCheckBox());
+    dollarSignCheckBox.setSelected(presetChars.getDollarSignCheckBox());
+    dotCheckBox.setSelected(presetChars.getDotCheckBox());
+    lowerCaseLettersCheckBox.setSelected(presetChars.getLowerCaseLettersCheckBox());
+    specialCheckBox.setSelected(presetChars.getSpecialCheckBox());
+    underscoreCheckBox.setSelected(presetChars.getUnderscoreCheckBox());
+    upperCaseLettersCheckBox.setSelected(presetChars.getUpperCaseLettersCheckBox());
+    minimalOccurences.setValue(presetChars.getMinimalOccurences());
 
-    if (presetChars.customCharactersCheckBox()) {
+    if (presetChars.getCustomCharactersCheckBox()) {
       customSetTextPane.setEditable(true);
       StringBuilder customSetText = new StringBuilder();
-      for (String str : presetChars.customCharacters()) {
+      for (String str : presetChars.getCustomCharacters()) {
         customSetText.append(str);
         customSetText.append(",");
       }

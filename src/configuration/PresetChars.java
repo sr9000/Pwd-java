@@ -6,33 +6,39 @@ import java.util.Collections;
 import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JTextPane;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(name = "root")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class PresetChars {
 
-  @XmlElement private Boolean lowerCaseLettersCheckBox; // a b c ...
+  private Boolean lowerCaseLettersCheckBox; // a b c ...
+  private Boolean upperCaseLettersCheckBox; // A B C ...
+  private Boolean digitsCheckBox; // 0 1 2 ...
+  private Boolean commercialAtCheckBox; // @
+  private Boolean underscoreCheckBox; // _
+  private Boolean dollarSignCheckBox; // $
+  private Boolean dotCheckBox; // .
+  private Boolean bracesCheckBox; // <> () [] {}
+  private Boolean specialCheckBox; // + - =
+  private Boolean customCharactersCheckBox;
+
+  @XmlElementWrapper(name = "ListCustomCharacters")
+  private List<String> customCharacters;
+
+  private Integer minimalOccurences;
   private static List<String> lowerCaseLetters;
-  @XmlElement private Boolean upperCaseLettersCheckBox; // A B C ...
   private static List<String> upperCaseLetters;
-  @XmlElement private Boolean digitsCheckBox; // 0 1 2 ...
   private static List<String> digits;
-  @XmlElement private Boolean commercialAtCheckBox; // @
   private static List<String> commercialAt;
-  @XmlElement private Boolean underscoreCheckBox; // _
   private static List<String> underscore;
-  @XmlElement private Boolean dollarSignCheckBox; // $
   private static List<String> dollarSign;
-  @XmlElement private Boolean dotCheckBox; // .
   private static List<String> dot;
-  @XmlElement private Boolean bracesCheckBox; // <> () [] {}
   private static List<String> braces;
-  @XmlElement private Boolean specialCheckBox; // + - =
   private static List<String> special;
-  @XmlElement private Boolean customCharactersCheckBox;
-  @XmlElement private List<String> customCharacters;
-  @XmlElement private Integer minimalOccurences;
 
   static {
     lowerCaseLetters = new ArrayList<>('z' - 'a' + 1);
@@ -126,11 +132,11 @@ public class PresetChars {
     return isValid;
   }
 
-  public boolean lowerCaseLettersCheckBox() {
+  public Boolean getLowerCaseLettersCheckBox() {
     return lowerCaseLettersCheckBox;
   }
 
-  public void setLowerCaseLettersCheckBox(boolean lowerCaseLettersCheckBoxValue) {
+  public void setLowerCaseLettersCheckBox(Boolean lowerCaseLettersCheckBoxValue) {
     this.lowerCaseLettersCheckBox = lowerCaseLettersCheckBoxValue;
   }
 
@@ -138,11 +144,11 @@ public class PresetChars {
     this.setLowerCaseLettersCheckBox(lowerCaseLettersCheckBox.isSelected());
   }
 
-  public boolean upperCaseLettersCheckBox() {
+  public Boolean getUpperCaseLettersCheckBox() {
     return upperCaseLettersCheckBox;
   }
 
-  public void setUpperCaseLettersCheckBox(boolean upperCaseLettersCheckBoxValue) {
+  public void setUpperCaseLettersCheckBox(Boolean upperCaseLettersCheckBoxValue) {
     this.upperCaseLettersCheckBox = upperCaseLettersCheckBoxValue;
   }
 
@@ -150,11 +156,11 @@ public class PresetChars {
     this.setUpperCaseLettersCheckBox(upperCaseLettersCheckBox.isSelected());
   }
 
-  public boolean digitsCheckBox() {
+  public Boolean getDigitsCheckBox() {
     return digitsCheckBox;
   }
 
-  public void setDigitsCheckBox(boolean digitsCheckBoxValue) {
+  public void setDigitsCheckBox(Boolean digitsCheckBoxValue) {
     this.digitsCheckBox = digitsCheckBoxValue;
   }
 
@@ -162,11 +168,11 @@ public class PresetChars {
     this.setDigitsCheckBox(digitsCheckBox.isSelected());
   }
 
-  public boolean commercialAtCheckBox() {
+  public Boolean getCommercialAtCheckBox() {
     return commercialAtCheckBox;
   }
 
-  public void setCommercialAtCheckBox(boolean commercialAtCheckBoxValue) {
+  public void setCommercialAtCheckBox(Boolean commercialAtCheckBoxValue) {
     this.commercialAtCheckBox = commercialAtCheckBoxValue;
   }
 
@@ -174,11 +180,11 @@ public class PresetChars {
     this.setCommercialAtCheckBox(commercialAtCheckBox.isSelected());
   }
 
-  public boolean underscoreCheckBox() {
+  public Boolean getUnderscoreCheckBox() {
     return underscoreCheckBox;
   }
 
-  public void setUnderscoreCheckBox(boolean underscoreCheckBoxValue) {
+  public void setUnderscoreCheckBox(Boolean underscoreCheckBoxValue) {
     this.underscoreCheckBox = underscoreCheckBoxValue;
   }
 
@@ -186,11 +192,11 @@ public class PresetChars {
     this.setUnderscoreCheckBox(underscoreCheckBox.isSelected());
   }
 
-  public boolean dollarSignCheckBox() {
+  public Boolean getDollarSignCheckBox() {
     return dollarSignCheckBox;
   }
 
-  public void setDollarSignCheckBox(boolean dollarSignCheckBoxValue) {
+  public void setDollarSignCheckBox(Boolean dollarSignCheckBoxValue) {
     this.dollarSignCheckBox = dollarSignCheckBoxValue;
   }
 
@@ -198,11 +204,11 @@ public class PresetChars {
     this.setDollarSignCheckBox(dollarSignCheckBox.isSelected());
   }
 
-  public boolean bracesCheckBox() {
+  public Boolean getBracesCheckBox() {
     return bracesCheckBox;
   }
 
-  public void setBracesCheckBox(boolean bracesCheckBoxValue) {
+  public void setBracesCheckBox(Boolean bracesCheckBoxValue) {
     this.bracesCheckBox = bracesCheckBoxValue;
   }
 
@@ -210,11 +216,11 @@ public class PresetChars {
     this.setBracesCheckBox(bracesCheckBox.isSelected());
   }
 
-  public boolean dotCheckBox() {
+  public Boolean getDotCheckBox() {
     return dotCheckBox;
   }
 
-  public void setDotCheckBox(boolean dotCheckBoxValue) {
+  public void setDotCheckBox(Boolean dotCheckBoxValue) {
     this.dotCheckBox = dotCheckBoxValue;
   }
 
@@ -222,11 +228,11 @@ public class PresetChars {
     this.setDotCheckBox(dotCheckBox.isSelected());
   }
 
-  public boolean specialCheckBox() {
+  public Boolean getSpecialCheckBox() {
     return specialCheckBox;
   }
 
-  public void setSpecialCheckBox(boolean specialCheckBoxValue) {
+  public void setSpecialCheckBox(Boolean specialCheckBoxValue) {
     this.specialCheckBox = specialCheckBoxValue;
   }
 
@@ -234,11 +240,11 @@ public class PresetChars {
     this.setSpecialCheckBox(specialCheckBox.isSelected());
   }
 
-  public boolean customCharactersCheckBox() {
+  public Boolean getCustomCharactersCheckBox() {
     return customCharactersCheckBox;
   }
 
-  public void setCustomCharactersCheckBox(boolean customCharactersCheckBoxValue) {
+  public void setCustomCharactersCheckBox(Boolean customCharactersCheckBoxValue) {
     this.customCharactersCheckBox = customCharactersCheckBoxValue;
   }
 
@@ -246,7 +252,7 @@ public class PresetChars {
     this.setCustomCharactersCheckBox(customCharactersCheckBox.isSelected());
   }
 
-  public List<String> customCharacters() {
+  public List<String> getCustomCharacters() {
     return new ArrayList<>(customCharacters);
   }
 
@@ -269,6 +275,14 @@ public class PresetChars {
 
   public void setCustomCharacters(JTextPane customCharactersTextPane) {
     this.setCustomCharacters(customCharactersTextPane.getText());
+  }
+
+  public Integer getMinimalOccurences() {
+    return minimalOccurences;
+  }
+
+  public void setMinimalOccurences(Integer minimalOccurences) {
+    this.minimalOccurences = minimalOccurences;
   }
 
   @Override
@@ -310,13 +324,5 @@ public class PresetChars {
       str.setCharAt(str.lastIndexOf(","), ']');
     }
     return str.toString();
-  }
-
-  public int minimalOccurences() {
-    return minimalOccurences;
-  }
-
-  public void setMinimalOccurences(int minimalOccurences) {
-    this.minimalOccurences = minimalOccurences;
   }
 }
