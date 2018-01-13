@@ -190,10 +190,12 @@
                     <properties/>
                     <border type="bevel-lowered"/>
                     <children>
-                      <component id="48a61" class="javax.swing.JTable" binding="table1" default-binding="true">
+                      <component id="48a61" class="javax.swing.JTable" binding="tableCharacterSets">
                         <constraints/>
                         <properties>
+                          <autoCreateColumnsFromModel value="true"/>
                           <autoCreateRowSorter value="false"/>
+                          <enabled value="true"/>
                           <fillsViewportHeight value="true"/>
                           <preferredScrollableViewportSize width="300" height="200"/>
                           <showVerticalLines value="true"/>
@@ -284,7 +286,7 @@
                       <text value="Minimal password length:"/>
                     </properties>
                   </component>
-                  <component id="af1e" class="javax.swing.JTextField" binding="a0TextField" default-binding="true">
+                  <component id="af1e" class="javax.swing.JTextField" binding="minimalPasswordLength">
                     <constraints/>
                     <properties>
                       <columns value="2"/>
@@ -457,9 +459,12 @@
                                 <properties/>
                                 <border type="none"/>
                                 <children>
-                                  <component id="63108" class="javax.swing.JTextPane" binding="textPane1" default-binding="true">
+                                  <component id="63108" class="javax.swing.JTextPane" binding="customSetTextPane">
                                     <constraints/>
-                                    <properties/>
+                                    <properties>
+                                      <editable value="false"/>
+                                      <enabled value="true"/>
+                                    </properties>
                                   </component>
                                 </children>
                               </scrollpane>
@@ -726,7 +731,7 @@
                               <text value="Minimal number symbols of set in password:"/>
                             </properties>
                           </component>
-                          <component id="13947" class="javax.swing.JSpinner" binding="spinner1" default-binding="true">
+                          <component id="13947" class="javax.swing.JSpinner" binding="minimalOccurences">
                             <constraints>
                               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                               <gridbag weightx="1.0" weighty="0.0"/>
