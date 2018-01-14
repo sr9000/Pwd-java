@@ -24,6 +24,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -117,6 +119,8 @@ public class Form1 {
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
+            int minLen = Integer.parseInt(minimalPasswordLength.getText());
+            pwdLenSpinner.setValue(minLen);
           }
         });
     clNextButton.addActionListener(
@@ -458,6 +462,15 @@ public class Form1 {
               assignTableOfPresetChars(tableOfPresetChars);
               caNextButton.setEnabled(tableOfPresetChars.produceCharacterSet().size() > 1);
             });
+
+    pwdLenSpinner.addChangeListener(
+        e -> {
+          int len = (Integer) (pwdLenSpinner.getValue());
+          int minLen = Integer.parseInt(minimalPasswordLength.getText());
+          if (len < minLen) {
+            pwdLenSpinner.setValue(minLen);
+          }
+        });
   }
 
   private void assignTableOfPresetChars(TableOfPresetChars tableOfPresetChars) {
