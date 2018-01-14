@@ -19,6 +19,14 @@ public class TableOfPresetChars {
     tableOfPresetChars = new ArrayList<>();
   }
 
+  public List<String> produceCharacterSet() {
+    List<String> list = new ArrayList<>();
+    for (PresetChars presetChars : tableOfPresetChars) {
+      list.addAll(presetChars.produceCharacterSet());
+    }
+    return list;
+  }
+
   public List<PresetChars> getTableOfPresetChars() {
     return new ArrayList<>(tableOfPresetChars);
   }

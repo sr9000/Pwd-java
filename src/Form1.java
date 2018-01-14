@@ -453,6 +453,10 @@ public class Form1 {
                 minPassLen += (Integer) val;
               }
               minimalPasswordLength.setText(String.valueOf(minPassLen));
+
+              TableOfPresetChars tableOfPresetChars = new TableOfPresetChars();
+              assignTableOfPresetChars(tableOfPresetChars);
+              caNextButton.setEnabled(tableOfPresetChars.produceCharacterSet().size() > 1);
             });
   }
 
@@ -565,8 +569,6 @@ public class Form1 {
       } else {
         try {
           JAXBContext jaxbContext = JAXBContext.newInstance(classOfObjectToSave);
-          // JAXBElement jaxbElement =
-          // new JAXBElement<>(new QName("root"), classOfObjectToSave, objToSave);
           boolean ignoredBoolean = fileToSave.createNewFile();
           jaxbContext.createMarshaller().marshal(objToSave, fileToSave);
         } catch (Exception ex) {

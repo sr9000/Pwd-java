@@ -82,7 +82,7 @@ public class PresetChars {
     this.customCharacters = new ArrayList<>();
   }
 
-  public List<String> ProduceCharacterSet() {
+  public List<String> produceCharacterSet() {
     List<String> characters = new ArrayList<>();
     if (lowerCaseLettersCheckBox) {
       characters.addAll(lowerCaseLetters);
