@@ -1,7 +1,6 @@
 package sequence.radix.converter;
 
-import java.util.Dictionary;
-import java.util.stream.Stream;
+import java.util.List;
 
 /** @ param &lt;T&gt; Numeric type of values oin sequences to convert. */
 public interface ISequenceRadixConverterFabric<T extends Number> {
@@ -21,20 +20,20 @@ public interface ISequenceRadixConverterFabric<T extends Number> {
     /**
      * Method saves maximum entropy of source sequence. Skipped values will be forgotten.
      *
-     * @param srcStream Stream of numbers to convert.
-     * @return New stream, with changed radix.
+     * @param srcSequence Sequence of numbers to convert.
+     * @return New sequence, with changed radix.
      */
-    public abstract Stream<T> convert(Stream<T> srcStream);
+    public abstract List<T> convert(List<T> srcSequence);
 
     /**
-     * Method saves maximum entropy of source sequence. Skipped values will be saved into
-     * skippedValues.
+     * Method saves maximum entropy of source sequence. Skipped values will be forgotten. Use no
+     * more values than necessary to specified number of new stream values.
      *
-     * @param srcStream Stream of numbers to convert.
-     * @param skippedValues Dictionary to save skipped value by its index (starts from 0).
-     * @return New stream, with changed radix.
+     * @param srcSequence Sequence of numbers to convert.
+     * @param targetCount Numbers of necessary new sequence values.
+     * @return New sequence, with changed radix.
      */
-    public abstract Stream<T> convert(Dictionary<Integer, T> skippedValues, Stream<T> srcStream);
+    public abstract List<T> convert(List<T> srcSequence, Integer targetCount);
 
     /**
      * Initialize Coverter and do some work with internal state.

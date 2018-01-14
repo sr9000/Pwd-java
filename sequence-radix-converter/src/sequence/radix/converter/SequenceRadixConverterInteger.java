@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,29 +50,34 @@ public class SequenceRadixConverterInteger
   }
 
   @Override
-  public Stream<Integer> convert(Stream<Integer> srcStream) {
-    List<Integer> list = srcStream.collect(Collectors.toList());
-    return collapseList(list, Stream.builder()).build();
+  public List<Integer> convert(List<Integer> srcSequence) {
+    return collapseList(srcSequence);
   }
 
   @Override
-  public Stream<Integer> convert(
-      Dictionary<Integer, Integer> skippedValues, Stream<Integer> srcStream) {
-    List<Integer> list = srcStream.collect(Collectors.toList());
-    return collapseList(skippedValues, list, Stream.builder()).build();
+  public List<Integer> convert(List<Integer> srcSequence, Integer targetCount) {
+    int takeNumber = 0;
+    List<Integer> result = null;
+    do {
+      if (takeNumber + 1 > srcSequence.size()) {
+        break;
+      }
+      takeNumber++;
+      result = collapseList(srcSequence.subList(0, takeNumber));
+    } while (result.size() < targetCount);
+    for (int i = 0; i < takeNumber; i++) {
+      srcSequence.remove(0);
+    }
+    return result;
   }
 
-  private Stream.Builder<Integer> collapseList(List<Integer> list, Builder<Integer> builder) {
-    return collapseList(null, list, builder);
-  }
-
-  private Stream.Builder<Integer> collapseList(
-      Dictionary<Integer, Integer> skippedValues,
-      List<Integer> srcValuesList,
-      Stream.Builder<Integer> builder) {
+  private List<Integer> collapseList(List<Integer> srcValuesList) {
     final BigInteger zero = new BigInteger("0", 10);
     final BigInteger srcMultiplier = new BigInteger(srcRadix.toString(), 10);
     final BigInteger dstMultiplier = new BigInteger(dstRadix.toString(), 10);
+
+    List<Integer> result = new LinkedList<>();
+
     Integer index = 0;
     while (true) {
       // check exit condition
@@ -104,18 +110,13 @@ public class SequenceRadixConverterInteger
         for (int i = 0; i < convertOption.dstSequenceLength; ++i) {
           BigInteger[] divAndRem = srcNumber.divideAndRemainder(dstMultiplier);
           srcNumber = divAndRem[0];
-          builder = builder.add(divAndRem[1].intValueExact());
+          result.add(divAndRem[1].intValueExact());
         }
-      } else if (skippedValues != null) {
-        // save skipped value
-        skippedValues.put(index++, srcValuesList.remove(0));
+      } else {
+        srcValuesList.remove(0);
       }
     }
-    // save skipped rest
-    while (skippedValues != null && srcValuesList.size() > 0) {
-      skippedValues.put(index++, srcValuesList.remove(0));
-    }
-    return builder;
+    return result;
   }
 
   @Override

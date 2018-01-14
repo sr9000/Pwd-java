@@ -17,8 +17,12 @@ class SequenceRadixConverterIntegerTest {
     for (int i = 1000; i < 1072; i += 7) {
       srcList.add(i % 11);
     }
-    Dictionary<Integer, Integer> dict = new Hashtable<>();
-    List<Integer> dstList = converter.convert(dict, srcList.stream()).collect(Collectors.toList());
-    Integer l = dstList.size();
+    for (int i = 20; i < 22; i++) {
+      List<Integer> cpList = new ArrayList<>(srcList);
+      List<Integer> dstList = converter.convert(cpList, i);
+      Integer lcp = cpList.size();
+      Integer dcp = dstList.size();
+      Integer x = 0;
+    }
   }
 }
