@@ -54,7 +54,7 @@ public class Form1 {
   private JButton getMyPasswordButton;
   private JButton loadTableButton;
   private JPanel panelMain;
-  private JProgressBar progressBar1;
+  private JProgressBar passwordProgressBar;
   private JSpinner pwdLenSpinner;
   private JButton removeButton;
   private JButton saveTableButton;
@@ -62,7 +62,7 @@ public class Form1 {
   private JButton addButton1;
   private JButton editButton1;
   private JButton removeButton1;
-  private JTable table2;
+  private JTable tableEntropySequences;
   private JButton loadPresetButton;
   private JButton savePresetButton;
   private JSpinner minimalOccurences;
@@ -119,7 +119,7 @@ public class Form1 {
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
-            int minLen = Integer.parseInt(minimalPasswordLength.getText());
+            int minLen = Integer.max(1, Integer.parseInt(minimalPasswordLength.getText()));
             pwdLenSpinner.setValue(minLen);
           }
         });
@@ -424,6 +424,12 @@ public class Form1 {
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).first(panelMain);
+
+            passwordProgressBar.setValue(0);
+            DefaultTableModel model = (DefaultTableModel) tableEntropySequences.getModel();
+            while (model.getRowCount() > 0) {
+              model.removeRow(0);
+            }
           }
         });
 
@@ -466,7 +472,7 @@ public class Form1 {
     pwdLenSpinner.addChangeListener(
         e -> {
           int len = (Integer) (pwdLenSpinner.getValue());
-          int minLen = Integer.parseInt(minimalPasswordLength.getText());
+          int minLen = Integer.max(1, Integer.parseInt(minimalPasswordLength.getText()));
           if (len < minLen) {
             pwdLenSpinner.setValue(minLen);
           }
@@ -637,9 +643,16 @@ public class Form1 {
 
   private static void setup_tableCharacterSets(Form1 form) {
     DefaultTableModel model = (DefaultTableModel) form.tableCharacterSets.getModel();
+    form.tableCharacterSets.setDefaultEditor(Object.class, null);
     model.addColumn("Character Set Preview");
     model.addColumn("Minimal Occurences");
-    form.tableCharacterSets.setDefaultEditor(Object.class, null);
+  }
+
+  private static void setup_tableEntropySequences(Form1 form) {
+    DefaultTableModel model = (DefaultTableModel) form.tableEntropySequences.getModel();
+    form.tableEntropySequences.setDefaultEditor(Object.class, null);
+    model.addColumn("Entropy Preview");
+    model.addColumn("Entropy Source");
   }
 
   public static void main(String[] args) {
@@ -647,6 +660,7 @@ public class Form1 {
 
     Form1 myForm = new Form1();
     setup_tableCharacterSets(myForm);
+    setup_tableEntropySequences(myForm);
 
     frame.setContentPane(myForm.panelMain);
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
