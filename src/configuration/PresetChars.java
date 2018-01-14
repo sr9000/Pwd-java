@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import javax.swing.JCheckBox;
 import javax.swing.JTextPane;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -11,7 +12,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "root")
+@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class PresetChars {
 
@@ -30,6 +31,7 @@ public class PresetChars {
   private List<String> customCharacters;
 
   private Integer minimalOccurences;
+
   private static List<String> lowerCaseLetters;
   private static List<String> upperCaseLetters;
   private static List<String> digits;
@@ -324,5 +326,45 @@ public class PresetChars {
       str.setCharAt(str.lastIndexOf(","), ']');
     }
     return str.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) {
+      return true;
+    }
+    if (!(o instanceof PresetChars)) {
+      return false;
+    }
+    PresetChars presetChars = (PresetChars) o;
+    return Objects.equals(lowerCaseLettersCheckBox, presetChars.lowerCaseLettersCheckBox)
+        && Objects.equals(upperCaseLettersCheckBox, presetChars.upperCaseLettersCheckBox)
+        && Objects.equals(digitsCheckBox, presetChars.digitsCheckBox)
+        && Objects.equals(commercialAtCheckBox, presetChars.commercialAtCheckBox)
+        && Objects.equals(underscoreCheckBox, presetChars.underscoreCheckBox)
+        && Objects.equals(dollarSignCheckBox, presetChars.dollarSignCheckBox)
+        && Objects.equals(dotCheckBox, presetChars.dotCheckBox)
+        && Objects.equals(bracesCheckBox, presetChars.bracesCheckBox)
+        && Objects.equals(specialCheckBox, presetChars.specialCheckBox)
+        && Objects.equals(customCharactersCheckBox, presetChars.customCharactersCheckBox)
+        && Objects.equals(customCharacters, presetChars.customCharacters)
+        && Objects.equals(minimalOccurences, presetChars.minimalOccurences);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        lowerCaseLettersCheckBox,
+        upperCaseLettersCheckBox,
+        digitsCheckBox,
+        commercialAtCheckBox,
+        underscoreCheckBox,
+        dollarSignCheckBox,
+        dotCheckBox,
+        bracesCheckBox,
+        specialCheckBox,
+        customCharactersCheckBox,
+        customCharacters,
+        minimalOccurences);
   }
 }

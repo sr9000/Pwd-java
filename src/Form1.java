@@ -1,12 +1,14 @@
 import configuration.PresetChars;
+import configuration.TableOfPresetChars;
 import java.awt.CardLayout;
 import java.awt.event.ItemEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Vector;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -21,6 +23,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.WindowConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -30,7 +33,7 @@ import javax.xml.namespace.QName;
 
 public class Form1 {
 
-  private Integer EditableRow;
+  private Integer editableRow;
   private JTextField minimalPasswordLength;
   private JButton acceptButton;
   private JButton addButton;
@@ -140,17 +143,17 @@ public class Form1 {
         e -> {
           if (cardAlphabet.getLayout() instanceof CardLayout) {
             ((CardLayout) cardAlphabet.getLayout()).next(cardAlphabet);
-            ClonePresetChars(new PresetChars());
+            clonePresetChars(new PresetChars());
           }
         });
     editButton.addActionListener(
         e -> {
           if (cardAlphabet.getLayout() instanceof CardLayout) {
             if (!tableCharacterSets.getSelectionModel().isSelectionEmpty()) {
-              EditableRow = tableCharacterSets.getSelectedRow();
+              editableRow = tableCharacterSets.getSelectedRow();
               ((CardLayout) cardAlphabet.getLayout()).next(cardAlphabet);
-              ClonePresetChars(
-                  (PresetChars) tableCharacterSets.getModel().getValueAt(EditableRow, 0));
+              clonePresetChars(
+                  (PresetChars) tableCharacterSets.getModel().getValueAt(editableRow, 0));
             } else {
               JOptionPane.showMessageDialog(panelMain, "No rows selected!");
             }
@@ -210,11 +213,59 @@ public class Form1 {
             }
           }
         });
+    saveTableButton.addActionListener(
+        e -> {
+          TableOfPresetChars tableOfPresetChars = new TableOfPresetChars();
+
+          assignTableOfPresetChars(tableOfPresetChars);
+
+          if (!tableOfPresetChars.getTableOfPresetChars().isEmpty()) {
+            generalSaver(
+                ", when saving table of presets...", tableOfPresetChars, TableOfPresetChars.class);
+          } else {
+            JOptionPane.showMessageDialog(panelMain, "Nothing to save!");
+          }
+        });
+    loadTableButton.addActionListener(
+        e ->
+            generalLoader(
+                ", when loading table of presets...",
+                table -> {
+                  final String replace = "Replace current list with loaded values.";
+                  final String append = "Append current list with loaded values.";
+                  final String merge = "Merge current list and loaded values.";
+                  String[] values = {replace, append, merge};
+
+                  Object selected =
+                      JOptionPane.showInputDialog(
+                          panelMain,
+                          "How you want to load new values?",
+                          "Selecting loading method",
+                          JOptionPane.DEFAULT_OPTION,
+                          null,
+                          values,
+                          replace);
+                  if (selected != null) { // null if the user cancels.
+                    String selectedString = selected.toString();
+                    switch (selectedString) {
+                      case replace:
+                        replaceWithNewTableOfPresetChars(table);
+                        break;
+                      case append:
+                        appendWithNewTableOfPresetChars(table);
+                        break;
+                      case merge:
+                        mergeWithNewTableOfPresetChars(table);
+                        break;
+                    }
+                  }
+                },
+                TableOfPresetChars.class));
 
     cancelButton.addActionListener(
         e -> {
           if (cardAlphabet.getLayout() instanceof CardLayout) {
-            EditableRow = null;
+            editableRow = null;
             ((CardLayout) cardAlphabet.getLayout()).previous(cardAlphabet);
           }
         });
@@ -223,19 +274,19 @@ public class Form1 {
           if (cardAlphabet.getLayout() instanceof CardLayout) {
             PresetChars presetChars = new PresetChars();
 
-            AssignPresetChars(presetChars);
+            assignPresetChars(presetChars);
 
             if (presetChars.isValid()) {
-              if (EditableRow == null) {
+              if (editableRow == null) {
                 ((DefaultTableModel) (tableCharacterSets.getModel()))
                     .addRow(new Object[] {presetChars, presetChars.getMinimalOccurences()});
               } else {
-                ((DefaultTableModel) (tableCharacterSets.getModel())).removeRow(EditableRow);
+                ((DefaultTableModel) (tableCharacterSets.getModel())).removeRow(editableRow);
                 ((DefaultTableModel) (tableCharacterSets.getModel()))
                     .insertRow(
-                        EditableRow,
+                        editableRow,
                         new Object[] {presetChars, presetChars.getMinimalOccurences()});
-                EditableRow = null;
+                editableRow = null;
               }
               ((CardLayout) cardAlphabet.getLayout()).previous(cardAlphabet);
             } else {
@@ -247,7 +298,7 @@ public class Form1 {
         e -> {
           PresetChars presetChars = new PresetChars();
 
-          AssignPresetChars(presetChars);
+          assignPresetChars(presetChars);
 
           if (presetChars.isValid()) {
             generalSaver(", when saving preset...", presetChars, PresetChars.class);
@@ -256,9 +307,7 @@ public class Form1 {
           }
         });
     loadPresetButton.addActionListener(
-        e -> {
-          generalLoader(", when loading preset...", this::ClonePresetChars, PresetChars.class);
-        });
+        e -> generalLoader(", when loading preset...", this::clonePresetChars, PresetChars.class));
 
     addButton1.addActionListener(
         e -> {
@@ -397,16 +446,56 @@ public class Form1 {
         .getModel()
         .addTableModelListener(
             e -> {
-              if (e.getType() == TableModelEvent.INSERT || e.getType() == TableModelEvent.UPDATE) {
-                DefaultTableModel model = (DefaultTableModel) e.getSource();
-                int minPassLen = 0;
-                for (int i = 0; i < model.getRowCount(); i++) {
-                  Object val = model.getValueAt(i, 1);
-                  minPassLen += (Integer) val;
-                }
-                minimalPasswordLength.setText(String.valueOf(minPassLen));
+              DefaultTableModel model = (DefaultTableModel) e.getSource();
+              int minPassLen = 0;
+              for (int i = 0; i < model.getRowCount(); i++) {
+                Object val = model.getValueAt(i, 1);
+                minPassLen += (Integer) val;
               }
+              minimalPasswordLength.setText(String.valueOf(minPassLen));
             });
+  }
+
+  private void assignTableOfPresetChars(TableOfPresetChars tableOfPresetChars) {
+    List<PresetChars> list = new ArrayList<>();
+
+    for (int i = 0; i < tableCharacterSets.getRowCount(); i++) {
+      list.add((PresetChars) tableCharacterSets.getValueAt(i, 0));
+    }
+    tableOfPresetChars.setTableOfPresetChars(list);
+  }
+
+  private void replaceWithNewTableOfPresetChars(TableOfPresetChars tableOfPresetChars) {
+    DefaultTableModel model = (DefaultTableModel) tableCharacterSets.getModel();
+    while (model.getRowCount() > 0) {
+      model.removeRow(0);
+    }
+    for (PresetChars presetChars : tableOfPresetChars.getTableOfPresetChars()) {
+      model.addRow(new Vector<>(Arrays.asList(presetChars, presetChars.getMinimalOccurences())));
+    }
+  }
+
+  private void appendWithNewTableOfPresetChars(TableOfPresetChars tableOfPresetChars) {
+    DefaultTableModel model = (DefaultTableModel) tableCharacterSets.getModel();
+    for (PresetChars presetChars : tableOfPresetChars.getTableOfPresetChars()) {
+      model.addRow(new Vector<>(Arrays.asList(presetChars, presetChars.getMinimalOccurences())));
+    }
+  }
+
+  private void mergeWithNewTableOfPresetChars(TableOfPresetChars tableOfPresetChars) {
+    DefaultTableModel model = (DefaultTableModel) tableCharacterSets.getModel();
+    List<PresetChars> list = new ArrayList<>();
+
+    for (Object v : model.getDataVector()) {
+      Vector<Object> vec = (Vector<Object>) v;
+      list.add((PresetChars) vec.get(0));
+    }
+
+    for (PresetChars presetChars : tableOfPresetChars.getTableOfPresetChars()) {
+      if (!list.contains(presetChars)) {
+        model.addRow(new Vector<>(Arrays.asList(presetChars, presetChars.getMinimalOccurences())));
+      }
+    }
   }
 
   private <T> void generalLoader(
@@ -416,7 +505,7 @@ public class Form1 {
     FileNameExtensionFilter filter = new FileNameExtensionFilter("XML FILES", "xml", "XML");
     fileChooser.setFileFilter(filter);
 
-    int userSelection = fileChooser.showSaveDialog(panelMain);
+    int userSelection = fileChooser.showOpenDialog(panelMain);
 
     if (userSelection == JFileChooser.APPROVE_OPTION) {
       File fileToLoad = fileChooser.getSelectedFile();
@@ -476,10 +565,10 @@ public class Form1 {
       } else {
         try {
           JAXBContext jaxbContext = JAXBContext.newInstance(classOfObjectToSave);
-          JAXBElement jaxbElement =
-              new JAXBElement<>(new QName("root"), classOfObjectToSave, objToSave);
+          // JAXBElement jaxbElement =
+          // new JAXBElement<>(new QName("root"), classOfObjectToSave, objToSave);
           boolean ignoredBoolean = fileToSave.createNewFile();
-          jaxbContext.createMarshaller().marshal(jaxbElement, fileToSave);
+          jaxbContext.createMarshaller().marshal(objToSave, fileToSave);
         } catch (Exception ex) {
           JOptionPane.showMessageDialog(
               panelMain, ex.toString(), "Exception" + callerId, JOptionPane.ERROR_MESSAGE);
@@ -488,7 +577,7 @@ public class Form1 {
     }
   }
 
-  private void AssignPresetChars(PresetChars presetChars) {
+  private void assignPresetChars(PresetChars presetChars) {
     presetChars.setBracesCheckBox(bracesCheckBox);
     presetChars.setCommercialAtCheckBox(commercialAtCheckBox);
     presetChars.setCustomCharacters(customSetTextPane);
@@ -503,7 +592,7 @@ public class Form1 {
     presetChars.setMinimalOccurences((Integer) (minimalOccurences.getValue()));
   }
 
-  private void ClonePresetChars(PresetChars presetChars) {
+  private void clonePresetChars(PresetChars presetChars) {
     bracesCheckBox.setSelected(presetChars.getBracesCheckBox());
     commercialAtCheckBox.setSelected(presetChars.getCommercialAtCheckBox());
     customSetCheckBox.setSelected(presetChars.getCustomCharactersCheckBox());
@@ -531,7 +620,7 @@ public class Form1 {
     }
   }
 
-  private static void Setup_tableCharacterSets(Form1 form) {
+  private static void setup_tableCharacterSets(Form1 form) {
     DefaultTableModel model = (DefaultTableModel) form.tableCharacterSets.getModel();
     model.addColumn("Character Set Preview");
     model.addColumn("Minimal Occurences");
@@ -542,10 +631,10 @@ public class Form1 {
     JFrame frame = new JFrame("Ultimate Password Generator");
 
     Form1 myForm = new Form1();
-    Setup_tableCharacterSets(myForm);
+    setup_tableCharacterSets(myForm);
 
     frame.setContentPane(myForm.panelMain);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     frame.pack();
     frame.setSize(frame.getWidth(), 410);
     frame.setLocationRelativeTo(null);
