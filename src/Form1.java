@@ -97,7 +97,6 @@ public class Form1 {
   private JButton rollDicesBackButton;
   private JButton rollDicesAcceptButton;
   private JSpinner rollDicesRadixSpinner;
-  private JTextPane rollDicesTextPane;
   private JPanel cardText;
   private JButton textEntropyCancelButton;
   private JButton textEntropyBackButton;
@@ -121,6 +120,7 @@ public class Form1 {
   private JPasswordField passwordField1;
   private JPasswordField passwordField2;
   private JTextArea binaryDataTextPane;
+  private JTextArea rollDicesTextPane;
 
   public Form1() {
 
