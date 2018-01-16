@@ -3,12 +3,9 @@ import configuration.TableOfPresetChars;
 import data.holder.EntropySequence;
 import data.holder.EntropySequence.EntropySequenceSource;
 import java.awt.CardLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,16 +29,14 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.bind.JAXBContext;
 
 public class Form1 {
 
-  public static final int MAXIMUM_BINARY_DATA_TO_READ = 100000;
-  public static final int MAXIMUM_BINARY_DATA_TO_PREVIEW = 1000;
+  private static final int MAXIMUM_BINARY_DATA_TO_READ = 100000;
+  private static final int MAXIMUM_BINARY_DATA_TO_PREVIEW = 1000;
   private File binaryFile;
   private byte[] binaryData;
   private Integer editableRow;
@@ -128,7 +123,7 @@ public class Form1 {
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
-            int minLen = Integer.max(1, Integer.parseInt(minimalPasswordLength.getText()));
+            int minLen = Integer.max(20, Integer.parseInt(minimalPasswordLength.getText()));
             pwdLenSpinner.setValue(minLen);
           }
         });
@@ -164,6 +159,11 @@ public class Form1 {
           if (cardAlphabet.getLayout() instanceof CardLayout) {
             if (!tableCharacterSets.getSelectionModel().isSelectionEmpty()) {
               editableRow = tableCharacterSets.getSelectedRow();
+              if (tableCharacterSets.getSelectedRows().length > 1) {
+                JOptionPane.showMessageDialog(
+                    panelMain, "To edit, you should select less than one row!");
+                return;
+              }
               ((CardLayout) cardAlphabet.getLayout()).next(cardAlphabet);
               clonePresetChars(
                   (PresetChars) tableCharacterSets.getModel().getValueAt(editableRow, 0));
@@ -254,7 +254,7 @@ public class Form1 {
                           panelMain,
                           "How you want to load new values?",
                           "Selecting loading method",
-                          JOptionPane.DEFAULT_OPTION,
+                          JOptionPane.PLAIN_MESSAGE,
                           null,
                           values,
                           replace);
