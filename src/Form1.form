@@ -1211,9 +1211,9 @@
                 <properties/>
                 <border type="bevel-raised"/>
                 <children>
-                  <component id="17c87" class="javax.swing.JButton" binding="nextButton" default-binding="true">
+                  <component id="17c87" class="javax.swing.JButton" binding="seNextButton">
                     <constraints>
-                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -1226,7 +1226,7 @@
                       <gridbag weightx="15.0" weighty="0.0"/>
                     </constraints>
                   </hspacer>
-                  <component id="87ca3" class="javax.swing.JButton" binding="backButton" default-binding="true">
+                  <component id="87ca3" class="javax.swing.JButton" binding="seBackButton">
                     <constraints>
                       <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
@@ -1237,13 +1237,13 @@
                   </component>
                   <hspacer id="d77f1">
                     <constraints>
-                      <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </hspacer>
                   <vspacer id="942ba">
                     <constraints>
-                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -1255,7 +1255,7 @@
                   </vspacer>
                   <vspacer id="b516c">
                     <constraints>
-                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -1265,6 +1265,12 @@
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
+                  <hspacer id="2b1bb">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </hspacer>
                 </children>
               </grid>
               <grid id="d9d9e" layout-manager="GridBagLayout">
@@ -1360,7 +1366,7 @@
                 <properties/>
                 <border type="bevel-raised"/>
                 <children>
-                  <component id="61578" class="javax.swing.JButton" binding="cancelButton1" default-binding="true">
+                  <component id="61578" class="javax.swing.JButton" binding="rollDicesCancelButton">
                     <constraints>
                       <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
@@ -1369,7 +1375,7 @@
                       <text value="Cancel"/>
                     </properties>
                   </component>
-                  <component id="be2d6" class="javax.swing.JButton" binding="backButton1" default-binding="true">
+                  <component id="be2d6" class="javax.swing.JButton" binding="rollDicesBackButton">
                     <constraints>
                       <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
@@ -1378,9 +1384,9 @@
                       <text value="Back"/>
                     </properties>
                   </component>
-                  <component id="7cc9" class="javax.swing.JButton" binding="acceptButton1" default-binding="true">
+                  <component id="7cc9" class="javax.swing.JButton" binding="rollDicesAcceptButton">
                     <constraints>
-                      <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -1401,19 +1407,19 @@
                   </hspacer>
                   <vspacer id="603ae">
                     <constraints>
-                      <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
                   <hspacer id="6e9a">
                     <constraints>
-                      <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </hspacer>
                   <vspacer id="f6b45">
                     <constraints>
-                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -1441,6 +1447,12 @@
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
+                  <hspacer id="a0c78">
+                    <constraints>
+                      <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </hspacer>
                 </children>
               </grid>
               <grid id="a1a35" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -1515,7 +1527,7 @@
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                       </vspacer>
-                      <component id="b95d9" class="javax.swing.JSpinner" binding="spinner2" default-binding="true">
+                      <component id="b95d9" class="javax.swing.JSpinner" binding="rollDicesRadixSpinner">
                         <constraints>
                           <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="1.0" weighty="0.0"/>
@@ -1550,7 +1562,7 @@
                             <properties/>
                             <border type="none"/>
                             <children>
-                              <component id="d2dde" class="javax.swing.JTextPane" binding="textPane2" default-binding="true">
+                              <component id="d2dde" class="javax.swing.JTextPane" binding="rollDicesTextPane">
                                 <constraints/>
                                 <properties/>
                               </component>
@@ -1615,7 +1627,7 @@
                 <properties/>
                 <border type="bevel-raised"/>
                 <children>
-                  <component id="b82b3" class="javax.swing.JButton" binding="cancelButton2" default-binding="true">
+                  <component id="b82b3" class="javax.swing.JButton" binding="textEntropyCancelButton">
                     <constraints>
                       <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
@@ -1624,7 +1636,7 @@
                       <text value="Cancel"/>
                     </properties>
                   </component>
-                  <component id="2500f" class="javax.swing.JButton" binding="backButton2" default-binding="true">
+                  <component id="2500f" class="javax.swing.JButton" binding="textEntropyBackButton">
                     <constraints>
                       <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
@@ -1633,9 +1645,9 @@
                       <text value="Back"/>
                     </properties>
                   </component>
-                  <component id="82d1e" class="javax.swing.JButton" binding="acceptButton2" default-binding="true">
+                  <component id="82d1e" class="javax.swing.JButton" binding="textEntropyAcceptButton">
                     <constraints>
-                      <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -1650,7 +1662,7 @@
                   </hspacer>
                   <hspacer id="7e6bc">
                     <constraints>
-                      <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </hspacer>
@@ -1674,13 +1686,13 @@
                   </vspacer>
                   <vspacer id="55085">
                     <constraints>
-                      <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
                   <vspacer id="2228">
                     <constraints>
-                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -1696,6 +1708,12 @@
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
+                  <hspacer id="d88a9">
+                    <constraints>
+                      <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </hspacer>
                 </children>
               </grid>
               <grid id="94b00" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -1764,7 +1782,7 @@
                             <properties/>
                             <border type="none"/>
                             <children>
-                              <component id="ce35f" class="javax.swing.JTextPane" binding="textPane3" default-binding="true">
+                              <component id="ce35f" class="javax.swing.JTextPane" binding="textEntropyTextPane">
                                 <constraints/>
                                 <properties/>
                               </component>
@@ -1811,7 +1829,7 @@
                 <properties/>
                 <border type="bevel-raised"/>
                 <children>
-                  <component id="fef34" class="javax.swing.JButton" binding="cancelButton3" default-binding="true">
+                  <component id="fef34" class="javax.swing.JButton" binding="binaryFileCancelButton">
                     <constraints>
                       <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
@@ -1820,7 +1838,7 @@
                       <text value="Cancel"/>
                     </properties>
                   </component>
-                  <component id="6011b" class="javax.swing.JButton" binding="backButton3" default-binding="true">
+                  <component id="6011b" class="javax.swing.JButton" binding="binaryFileBackButton">
                     <constraints>
                       <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
@@ -1829,9 +1847,9 @@
                       <text value="Back"/>
                     </properties>
                   </component>
-                  <component id="4d0d1" class="javax.swing.JButton" binding="acceptButton3" default-binding="true">
+                  <component id="4d0d1" class="javax.swing.JButton" binding="binaryFileAcceptButton">
                     <constraints>
-                      <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="1.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -1852,13 +1870,13 @@
                   </hspacer>
                   <hspacer id="2de13">
                     <constraints>
-                      <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </hspacer>
                   <vspacer id="20465">
                     <constraints>
-                      <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -1876,7 +1894,7 @@
                   </vspacer>
                   <vspacer id="e9e08">
                     <constraints>
-                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -1892,6 +1910,12 @@
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
+                  <hspacer id="50c1b">
+                    <constraints>
+                      <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </hspacer>
                 </children>
               </grid>
               <grid id="ae325" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -1951,7 +1975,7 @@
                             <properties/>
                             <border type="none"/>
                             <children>
-                              <component id="53455" class="javax.swing.JTextPane" binding="textPane4" default-binding="true">
+                              <component id="53455" class="javax.swing.JTextPane" binding="binaryDataTextPane">
                                 <constraints/>
                                 <properties>
                                   <editable value="false"/>
@@ -2040,7 +2064,7 @@
                             <properties/>
                             <border type="none"/>
                             <children>
-                              <component id="11e3a" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+                              <component id="11e3a" class="javax.swing.JTextField" binding="binaryFileTextField">
                                 <constraints/>
                                 <properties>
                                   <enabled value="false"/>
@@ -2048,7 +2072,7 @@
                               </component>
                             </children>
                           </scrollpane>
-                          <component id="c2d3e" class="javax.swing.JButton" binding="button1" default-binding="true">
+                          <component id="c2d3e" class="javax.swing.JButton" binding="binaryFileButton">
                             <constraints>
                               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                               <gridbag weightx="0.0" weighty="0.0"/>

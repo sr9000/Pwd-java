@@ -1,8 +1,15 @@
 import configuration.PresetChars;
 import configuration.TableOfPresetChars;
+import data.holder.EntropySequence;
+import data.holder.EntropySequence.EntropySequenceSource;
 import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,15 +33,16 @@ import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 
 public class Form1 {
 
+  public static final int MAXIMUM_BINARY_DATA_TO_READ = 100000;
+  public static final int MAXIMUM_BINARY_DATA_TO_PREVIEW = 100;
+  private File binaryFile;
+  private byte[] binaryData;
   private Integer editableRow;
   private JTextField minimalPasswordLength;
   private JButton acceptButton;
@@ -79,28 +87,28 @@ public class Form1 {
   private JTextPane customSetTextPane;
   private JPanel cardAddEntropy;
   private JPanel cardSelectEntropy;
-  private JButton nextButton;
-  private JButton backButton;
+  private JButton seNextButton;
+  private JButton seBackButton;
   private JRadioButton pregeneratedRandomBinaryDataRadioButton;
   private JRadioButton diceRollEntropyRadioButton;
   private JPanel cardDices;
-  private JButton cancelButton1;
-  private JButton backButton1;
-  private JButton acceptButton1;
-  private JSpinner spinner2;
-  private JTextPane textPane2;
+  private JButton rollDicesCancelButton;
+  private JButton rollDicesBackButton;
+  private JButton rollDicesAcceptButton;
+  private JSpinner rollDicesRadixSpinner;
+  private JTextPane rollDicesTextPane;
   private JPanel cardText;
-  private JButton cancelButton2;
-  private JButton backButton2;
-  private JButton acceptButton2;
-  private JTextPane textPane3;
+  private JButton textEntropyCancelButton;
+  private JButton textEntropyBackButton;
+  private JButton textEntropyAcceptButton;
+  private JTextPane textEntropyTextPane;
   private JPanel cardBinary;
-  private JButton cancelButton3;
-  private JButton backButton3;
-  private JButton acceptButton3;
-  private JTextPane textPane4;
-  private JButton button1;
-  private JTextField textField1;
+  private JButton binaryFileCancelButton;
+  private JButton binaryFileBackButton;
+  private JButton binaryFileAcceptButton;
+  private JTextPane binaryDataTextPane;
+  private JButton binaryFileButton;
+  private JTextField binaryFileTextField;
   private JRadioButton textBasedEntropyRadioButton;
   private JPanel cardGetPassword;
   private JButton copyToClipboardButton;
@@ -322,14 +330,14 @@ public class Form1 {
             ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
           }
         });
-    backButton.addActionListener(
+    seBackButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).previous(panelMain);
           }
         });
 
-    cancelButton1.addActionListener(
+    rollDicesCancelButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).first(panelMain);
@@ -337,22 +345,30 @@ public class Form1 {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
           }
         });
-    backButton1.addActionListener(
+    rollDicesBackButton.addActionListener(
         e -> {
           if (cardAddEntropy.getLayout() instanceof CardLayout) {
             ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
           }
         });
-    acceptButton1.addActionListener(
+    rollDicesAcceptButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
-            ((CardLayout) panelMain.getLayout()).first(panelMain);
-            ((CardLayout) panelMain.getLayout()).next(panelMain);
-            ((CardLayout) panelMain.getLayout()).next(panelMain);
+
+            EntropySequence entropySequence = new EntropySequence();
+            entropySequence.setEntropySequenceSource(
+                EntropySequenceSource.ROLL_DICES,
+                null,
+                null,
+                null,
+                (Integer) rollDicesRadixSpinner.getValue(),
+                rollDicesTextPane.getText());
+
+            acceptEntropy(entropySequence);
           }
         });
 
-    cancelButton2.addActionListener(
+    textEntropyCancelButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).first(panelMain);
@@ -360,22 +376,24 @@ public class Form1 {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
           }
         });
-    backButton2.addActionListener(
+    textEntropyBackButton.addActionListener(
         e -> {
           if (cardAddEntropy.getLayout() instanceof CardLayout) {
             ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
           }
         });
-    acceptButton2.addActionListener(
+    textEntropyAcceptButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
-            ((CardLayout) panelMain.getLayout()).first(panelMain);
-            ((CardLayout) panelMain.getLayout()).next(panelMain);
-            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            EntropySequence entropySequence = new EntropySequence();
+            entropySequence.setEntropySequenceSource(
+                EntropySequenceSource.TEXT, null, null, textEntropyTextPane.getText(), null, null);
+
+            acceptEntropy(entropySequence);
           }
         });
 
-    cancelButton3.addActionListener(
+    binaryFileCancelButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).first(panelMain);
@@ -383,35 +401,67 @@ public class Form1 {
             ((CardLayout) panelMain.getLayout()).next(panelMain);
           }
         });
-    backButton3.addActionListener(
+    binaryFileBackButton.addActionListener(
         e -> {
           if (cardAddEntropy.getLayout() instanceof CardLayout) {
             ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
           }
         });
-    acceptButton3.addActionListener(
+    binaryFileAcceptButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
-            ((CardLayout) panelMain.getLayout()).first(panelMain);
-            ((CardLayout) panelMain.getLayout()).next(panelMain);
-            ((CardLayout) panelMain.getLayout()).next(panelMain);
+            if (binaryFile == null) {
+              JOptionPane.showMessageDialog(
+                  panelMain,
+                  "No binary file specified.",
+                  "Error with binary entropy",
+                  JOptionPane.ERROR_MESSAGE);
+
+            } else if (!binaryFile.exists()) {
+              JOptionPane.showMessageDialog(
+                  panelMain,
+                  "Specified file does not exist.",
+                  "Error with binary entropy",
+                  JOptionPane.ERROR_MESSAGE);
+
+            } else if (!binaryFile.isFile()) {
+              JOptionPane.showMessageDialog(
+                  panelMain,
+                  "Specified path is pointed onto NOT a file.",
+                  "Error with binary entropy",
+                  JOptionPane.ERROR_MESSAGE);
+
+            } else {
+              EntropySequence entropySequence = new EntropySequence();
+              entropySequence.setEntropySequenceSource(
+                  EntropySequenceSource.BINARY_FILE, binaryFile, binaryData, null, null, null);
+
+              acceptEntropy(entropySequence);
+            }
           }
         });
 
-    nextButton.addActionListener(
+    seNextButton.addActionListener(
         e -> {
           if (!(cardAddEntropy.getLayout() instanceof CardLayout)) {
             return;
           }
           ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
           if (diceRollEntropyRadioButton.isSelected()) {
+            rollDicesRadixSpinner.setValue(2);
+            rollDicesTextPane.setText("");
             return;
           }
           ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
           if (textBasedEntropyRadioButton.isSelected()) {
+            textEntropyTextPane.setText("");
             return;
           }
           ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
+          binaryDataTextPane.setText("");
+          binaryFileTextField.setText("");
+          binaryFile = null;
+          binaryData = null;
         });
 
     getMyPasswordButton.addActionListener(
@@ -477,6 +527,93 @@ public class Form1 {
             pwdLenSpinner.setValue(minLen);
           }
         });
+
+    rollDicesRadixSpinner.addChangeListener(
+        e -> {
+          int len = (Integer) (rollDicesRadixSpinner.getValue());
+          if (len < 2) {
+            pwdLenSpinner.setValue(2);
+          }
+        });
+
+    binaryFileButton.addActionListener(
+        e -> {
+          JFileChooser fileChooser = new JFileChooser();
+          fileChooser.setDialogTitle("Specify a file to load");
+
+          int userSelection = fileChooser.showOpenDialog(panelMain);
+
+          if (userSelection == JFileChooser.APPROVE_OPTION) {
+            binaryFile = fileChooser.getSelectedFile();
+            binaryFileTextField.setText(binaryFile.getName());
+            binaryDataTextPane.setText("");
+
+            if (binaryFile.exists() && !binaryFile.isFile()) {
+              JOptionPane.showMessageDialog(
+                  panelMain,
+                  "You should specify true file (not directory or something else)!",
+                  "Error with loading binary entropy",
+                  JOptionPane.ERROR_MESSAGE);
+            } else if (!binaryFile.exists()) {
+              JOptionPane.showMessageDialog(
+                  panelMain,
+                  "File should exist to be loaded!",
+                  "Error with loading binary entropy",
+                  JOptionPane.ERROR_MESSAGE);
+            } else {
+              try {
+                FileInputStream fin = new FileInputStream(binaryFile);
+                binaryData =
+                    new byte[(int) Math.min(MAXIMUM_BINARY_DATA_TO_READ, binaryFile.length())];
+                fin.read(binaryData);
+                StringBuilder str = new StringBuilder();
+                for (int i = 0;
+                    i < Math.min(MAXIMUM_BINARY_DATA_TO_PREVIEW, binaryData.length);
+                    i++) {
+                  byte v = binaryData[i];
+                  str.append(bytePreview(v));
+                }
+                binaryDataTextPane.setText(str.toString());
+              } catch (IOException ex) {
+                JOptionPane.showMessageDialog(
+                    panelMain,
+                    ex.toString(),
+                    "Exception with loading binary entropy",
+                    JOptionPane.ERROR_MESSAGE);
+              }
+            }
+          }
+        });
+  }
+
+  private static char bytePreview(byte v) {
+    if (v < -64) {
+      return '-';
+    } else if (v < 0) {
+      return '+';
+    } else if (v < 64) {
+      return '=';
+    } else {
+      return '#';
+    }
+  }
+
+  private void acceptEntropy(EntropySequence entropySequence) {
+    if (entropySequence.isValid()) {
+      DefaultTableModel model = (DefaultTableModel) tableEntropySequences.getModel();
+      model.addRow(
+          new Object[] {entropySequence.getEntropySequenceSource().name(), entropySequence});
+
+      ((CardLayout) panelMain.getLayout()).first(panelMain);
+      ((CardLayout) panelMain.getLayout()).next(panelMain);
+      ((CardLayout) panelMain.getLayout()).next(panelMain);
+    } else {
+      JOptionPane.showMessageDialog(
+          panelMain,
+          "Specified entropy data is unusable. Try to input other data.",
+          "Unusable entropy data",
+          JOptionPane.INFORMATION_MESSAGE);
+    }
   }
 
   private void assignTableOfPresetChars(TableOfPresetChars tableOfPresetChars) {
