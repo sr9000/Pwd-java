@@ -28,6 +28,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
@@ -40,7 +41,7 @@ import javax.xml.bind.JAXBContext;
 public class Form1 {
 
   public static final int MAXIMUM_BINARY_DATA_TO_READ = 100000;
-  public static final int MAXIMUM_BINARY_DATA_TO_PREVIEW = 100;
+  public static final int MAXIMUM_BINARY_DATA_TO_PREVIEW = 1000;
   private File binaryFile;
   private byte[] binaryData;
   private Integer editableRow;
@@ -106,7 +107,6 @@ public class Form1 {
   private JButton binaryFileCancelButton;
   private JButton binaryFileBackButton;
   private JButton binaryFileAcceptButton;
-  private JTextPane binaryDataTextPane;
   private JButton binaryFileButton;
   private JTextField binaryFileTextField;
   private JRadioButton textBasedEntropyRadioButton;
@@ -120,6 +120,7 @@ public class Form1 {
   private JCheckBox encryptionAES256CheckBox;
   private JPasswordField passwordField1;
   private JPasswordField passwordField2;
+  private JTextArea binaryDataTextPane;
 
   public Form1() {
 

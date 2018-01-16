@@ -1972,13 +1972,18 @@
                             <constraints>
                               <card name="Card1"/>
                             </constraints>
-                            <properties/>
+                            <properties>
+                              <horizontalScrollBarPolicy value="31"/>
+                            </properties>
                             <border type="none"/>
                             <children>
-                              <component id="53455" class="javax.swing.JTextPane" binding="binaryDataTextPane">
+                              <component id="b5782" class="javax.swing.JTextArea" binding="binaryDataTextPane">
                                 <constraints/>
                                 <properties>
                                   <editable value="false"/>
+                                  <font name="DejaVu Sans Mono"/>
+                                  <lineWrap value="true"/>
+                                  <wrapStyleWord value="true"/>
                                 </properties>
                               </component>
                             </children>
@@ -2067,7 +2072,8 @@
                               <component id="11e3a" class="javax.swing.JTextField" binding="binaryFileTextField">
                                 <constraints/>
                                 <properties>
-                                  <enabled value="false"/>
+                                  <editable value="false"/>
+                                  <enabled value="true"/>
                                 </properties>
                               </component>
                             </children>
