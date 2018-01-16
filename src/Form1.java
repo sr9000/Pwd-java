@@ -160,6 +160,7 @@ public class Form1 {
             if (!tableCharacterSets.getSelectionModel().isSelectionEmpty()) {
               editableRow = tableCharacterSets.getSelectedRow();
               if (tableCharacterSets.getSelectedRows().length > 1) {
+                editableRow = null;
                 JOptionPane.showMessageDialog(
                     panelMain, "To edit, you should select less than one row!");
                 return;
@@ -330,6 +331,7 @@ public class Form1 {
           if (cardAddEntropy.getLayout() instanceof CardLayout) {
             ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
           }
+          diceRollEntropyRadioButton.setSelected(true);
         });
     seBackButton.addActionListener(
         e -> {
@@ -348,9 +350,7 @@ public class Form1 {
         });
     rollDicesBackButton.addActionListener(
         e -> {
-          if (cardAddEntropy.getLayout() instanceof CardLayout) {
-            ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
-          }
+          entropyEditorBackButton();
         });
     rollDicesAcceptButton.addActionListener(
         e -> {
@@ -365,7 +365,7 @@ public class Form1 {
                 (Integer) rollDicesRadixSpinner.getValue(),
                 rollDicesTextPane.getText());
 
-            acceptEntropy(entropySequence);
+            acceptOrEditEntropy(entropySequence);
           }
         });
 
@@ -379,9 +379,7 @@ public class Form1 {
         });
     textEntropyBackButton.addActionListener(
         e -> {
-          if (cardAddEntropy.getLayout() instanceof CardLayout) {
-            ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
-          }
+          entropyEditorBackButton();
         });
     textEntropyAcceptButton.addActionListener(
         e -> {
@@ -390,7 +388,7 @@ public class Form1 {
             entropySequence.setEntropySequenceSource(
                 EntropySequenceSource.TEXT, null, null, textEntropyTextPane.getText(), null, null);
 
-            acceptEntropy(entropySequence);
+            acceptOrEditEntropy(entropySequence);
           }
         });
 
@@ -404,9 +402,7 @@ public class Form1 {
         });
     binaryFileBackButton.addActionListener(
         e -> {
-          if (cardAddEntropy.getLayout() instanceof CardLayout) {
-            ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
-          }
+          entropyEditorBackButton();
         });
     binaryFileAcceptButton.addActionListener(
         e -> {
@@ -437,7 +433,7 @@ public class Form1 {
               entropySequence.setEntropySequenceSource(
                   EntropySequenceSource.BINARY_FILE, binaryFile, binaryData, null, null, null);
 
-              acceptEntropy(entropySequence);
+              acceptOrEditEntropy(entropySequence);
             }
           }
         });
@@ -546,7 +542,7 @@ public class Form1 {
 
           if (userSelection == JFileChooser.APPROVE_OPTION) {
             binaryFile = fileChooser.getSelectedFile();
-            binaryFileTextField.setText(binaryFile.getName());
+            binaryFileTextField.setText(binaryFile.getAbsolutePath());
             binaryDataTextPane.setText("");
 
             if (binaryFile.exists() && !binaryFile.isFile()) {
@@ -567,14 +563,7 @@ public class Form1 {
                 binaryData =
                     new byte[(int) Math.min(MAXIMUM_BINARY_DATA_TO_READ, binaryFile.length())];
                 fin.read(binaryData);
-                StringBuilder str = new StringBuilder();
-                for (int i = 0;
-                    i < Math.min(MAXIMUM_BINARY_DATA_TO_PREVIEW, binaryData.length);
-                    i++) {
-                  byte v = binaryData[i];
-                  str.append(bytePreview(v));
-                }
-                binaryDataTextPane.setText(str.toString());
+                assignBinaryFilePreviewTextPane();
               } catch (IOException ex) {
                 JOptionPane.showMessageDialog(
                     panelMain,
@@ -585,6 +574,155 @@ public class Form1 {
             }
           }
         });
+    editButton1.addActionListener(
+        e -> {
+          if (panelMain.getLayout() instanceof CardLayout) {
+            if (!tableEntropySequences.getSelectionModel().isSelectionEmpty()) {
+              editableRow = tableEntropySequences.getSelectedRow();
+              if (tableEntropySequences.getSelectedRows().length > 1) {
+                editableRow = null;
+                JOptionPane.showMessageDialog(
+                    panelMain, "To edit, you should select less than one row!");
+                return;
+              }
+
+              EntropySequence entropySequence =
+                  (EntropySequence) tableEntropySequences.getModel().getValueAt(editableRow, 1);
+
+              if (entropySequence.isValid()) {
+                if (!(cardAddEntropy.getLayout() instanceof CardLayout)) {
+                  return;
+                }
+
+                ((CardLayout) panelMain.getLayout()).next(panelMain);
+                ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
+                ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
+
+                if (entropySequence.getEntropySequenceSource()
+                    == EntropySequenceSource.ROLL_DICES) {
+                  rollDicesRadixSpinner.setValue(entropySequence.getSequenceRadix());
+                  rollDicesTextPane.setText(entropySequence.getSequence().toString());
+                  return;
+                }
+                ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
+                if (entropySequence.getEntropySequenceSource() == EntropySequenceSource.TEXT) {
+                  textEntropyTextPane.setText(entropySequence.getText());
+                  return;
+                }
+                ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
+                binaryDataTextPane.setText("");
+                binaryFileTextField.setText(entropySequence.getBinaryFile().getAbsolutePath());
+                binaryFile = entropySequence.getBinaryFile();
+                binaryData = entropySequence.getBinaryData();
+                assignBinaryFilePreviewTextPane();
+              } else {
+                JOptionPane.showMessageDialog(panelMain, "Selected value is not valid!");
+              }
+            } else {
+              JOptionPane.showMessageDialog(panelMain, "No rows selected!");
+            }
+          }
+        });
+
+    removeButton1.addActionListener(
+        e -> {
+          if (!tableEntropySequences.getSelectionModel().isSelectionEmpty()) {
+            int row = tableEntropySequences.getSelectedRow();
+            int[] rows = tableEntropySequences.getSelectedRows();
+            if (rows.length == 1) {
+              int answer =
+                  JOptionPane.showConfirmDialog(
+                      panelMain,
+                      "Remove row #"
+                          + (row + 1)
+                          + "?"
+                          + System.lineSeparator()
+                          + "Row content: "
+                          + tableEntropySequences.getValueAt(row, 1),
+                      "Confirm row removing",
+                      JOptionPane.YES_NO_OPTION,
+                      JOptionPane.QUESTION_MESSAGE);
+
+              if (answer == JOptionPane.YES_OPTION) {
+                ((DefaultTableModel) tableEntropySequences.getModel()).removeRow(row);
+              }
+            } else {
+              StringBuilder question = new StringBuilder();
+              question.append("Remove rows #");
+              for (int r : rows) {
+                question.append(r + 1);
+                question.append(',');
+              }
+              question.setCharAt(question.lastIndexOf(","), '?');
+
+              int answer =
+                  JOptionPane.showConfirmDialog(
+                      panelMain,
+                      question,
+                      "Confirm multiple rows removing",
+                      JOptionPane.YES_NO_OPTION,
+                      JOptionPane.QUESTION_MESSAGE);
+
+              if (answer == JOptionPane.YES_OPTION) {
+                Arrays.sort(rows);
+                List<Integer> lrows = Arrays.stream(rows).boxed().collect(Collectors.toList());
+                Collections.reverse(lrows);
+                for (Integer r : lrows) {
+                  ((DefaultTableModel) tableEntropySequences.getModel()).removeRow(r);
+                }
+              }
+            }
+          } else {
+            JOptionPane.showMessageDialog(panelMain, "No rows selected!");
+          }
+        });
+  }
+
+  private void entropyEditorBackButton() {
+    if (cardAddEntropy.getLayout() instanceof CardLayout) {
+      ((CardLayout) cardAddEntropy.getLayout()).first(cardAddEntropy);
+      if (editableRow != null) {
+        editableRow = null;
+        if (panelMain.getLayout() instanceof CardLayout) {
+          ((CardLayout) panelMain.getLayout()).previous(panelMain);
+        }
+      }
+    }
+  }
+
+  private void acceptOrEditEntropy(EntropySequence entropySequence) {
+    if (entropySequence.isValid()) {
+      if (editableRow == null) {
+        DefaultTableModel model = (DefaultTableModel) tableEntropySequences.getModel();
+        model.addRow(
+            new Object[] {entropySequence.getEntropySequenceSource().name(), entropySequence});
+      } else {
+        ((DefaultTableModel) (tableEntropySequences.getModel())).removeRow(editableRow);
+        ((DefaultTableModel) (tableEntropySequences.getModel()))
+            .insertRow(
+                editableRow,
+                new Object[] {entropySequence.getEntropySequenceSource().name(), entropySequence});
+        editableRow = null;
+      }
+      ((CardLayout) panelMain.getLayout()).first(panelMain);
+      ((CardLayout) panelMain.getLayout()).next(panelMain);
+      ((CardLayout) panelMain.getLayout()).next(panelMain);
+    } else {
+      JOptionPane.showMessageDialog(
+          panelMain,
+          "Specified entropy data is unusable. Try to input other data.",
+          "Unusable entropy data",
+          JOptionPane.INFORMATION_MESSAGE);
+    }
+  }
+
+  private void assignBinaryFilePreviewTextPane() {
+    StringBuilder str = new StringBuilder();
+    for (int i = 0; i < Math.min(MAXIMUM_BINARY_DATA_TO_PREVIEW, binaryData.length); i++) {
+      byte v = binaryData[i];
+      str.append(bytePreview(v));
+    }
+    binaryDataTextPane.setText(str.toString());
   }
 
   private static char bytePreview(byte v) {

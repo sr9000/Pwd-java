@@ -64,7 +64,7 @@ public class EntropySequence {
     this.text = text;
 
     Map<Character, Integer> frqMap = new Hashtable<>();
-    for (Character ch : text.toCharArray()) {
+    for (Character ch : this.text.replaceAll("\\s+", "").toCharArray()) {
       frqMap.merge(ch, 1, (a, b) -> a + b);
     }
     List<Map.Entry<Character, Integer>> frq = new ArrayList<>(frqMap.entrySet());
