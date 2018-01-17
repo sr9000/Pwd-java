@@ -68,7 +68,7 @@ public class SequenceRadixConverterInteger
     for (int i = 0; i < takeNumber; i++) {
       srcSequence.remove(0);
     }
-    if (targetCount > result.size()) {
+    if (result.size() > targetCount) {
       result = result.subList(0, targetCount);
     }
     return result;

@@ -50,7 +50,7 @@ public class Randomness {
       s += x;
     }
 
-    while ((r - l > 1) && wrong(s, r - l + 1, frq.get(l)) && wrong(s, r - l + 1, frq.get(r))) {
+    while ((r - l > 1) && (wrong(s, r - l + 1, frq.get(l)) || wrong(s, r - l + 1, frq.get(r)))) {
       double x = ((double) s) / ((double) frq.size());
       if (Math.abs(x - frq.get(l)) > Math.abs(x - frq.get(r))) {
         s -= frq.get(l);
@@ -61,6 +61,10 @@ public class Randomness {
       }
     }
 
-    return new SimpleEntry<>(l, r + 1);
+    if (wrong(s, r - l + 1, frq.get(l)) || wrong(s, r - l + 1, frq.get(r))) {
+      return null;
+    } else {
+      return new SimpleEntry<>(l, r + 1);
+    }
   }
 }

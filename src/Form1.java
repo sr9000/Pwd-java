@@ -604,7 +604,13 @@ public class Form1 {
                 if (entropySequence.getEntropySequenceSource()
                     == EntropySequenceSource.ROLL_DICES) {
                   rollDicesRadixSpinner.setValue(entropySequence.getSequenceRadix());
-                  rollDicesTextPane.setText(entropySequence.getSequence().toString());
+                  rollDicesTextPane.setText(
+                      entropySequence
+                          .getSequence()
+                          .stream()
+                          .map(x -> x + 1)
+                          .collect(Collectors.toList())
+                          .toString());
                   return;
                 }
                 ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
@@ -686,6 +692,12 @@ public class Form1 {
             e -> {
               SequenceRadixConverterFabricInteger fab = new SequenceRadixConverterFabricInteger();
 
+              if (tableCharacterSets.getRowCount() == 0
+                  || tableEntropySequences.getRowCount() == 0) {
+                passwordProgressBar.setValue(passwordProgressBar.getMinimum());
+                return;
+              }
+
               List<Integer> ternary = new ArrayList<>();
               for (int i = 0; i < tableEntropySequences.getRowCount(); i++) {
                 EntropySequence entropySequence =
@@ -734,12 +746,14 @@ public class Form1 {
               }
 
               int targetLen = (Integer) pwdLenSpinner.getValue();
-              done +=
-                  fab.create(
-                          INTERMEDIATE_RADIX_SEQUENCE,
-                          tableOfPresetChars.produceCharacterSet().size())
-                      .convert(ternary, targetLen - done)
-                      .size();
+              if (targetLen > done) {
+                done +=
+                    fab.create(
+                            INTERMEDIATE_RADIX_SEQUENCE,
+                            tableOfPresetChars.produceCharacterSet().size())
+                        .convert(ternary, targetLen - done)
+                        .size();
+              }
 
               int percentDone =
                   Math.max(

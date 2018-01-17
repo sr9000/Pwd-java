@@ -32,7 +32,10 @@ public class EntropySequence {
   private String rollDices;
 
   public boolean isValid() {
-    return (sequenceRadix > 1) && (sequence.size() > 0);
+    return sequenceRadix != null
+        && sequence != null
+        && (sequenceRadix > 1)
+        && (sequence.size() > 0);
   }
 
   public void setEntropySequenceSource(
@@ -73,6 +76,10 @@ public class EntropySequence {
     Entry<Integer, Integer> uniformCoords =
         Randomness.findOptimalSegment(
             frq.stream().map(Entry::getValue).collect(Collectors.toList()));
+    if (uniformCoords == null) {
+      return;
+    }
+
     List<Character> list =
         frq.subList(uniformCoords.getKey(), uniformCoords.getValue())
             .stream()
@@ -104,7 +111,8 @@ public class EntropySequence {
     for (String txtRollDice : rollDices.split("[^0-9]+")) {
       try {
         Integer rollDice = Integer.parseInt(txtRollDice);
-        if (rollDice < dices) {
+        rollDice--;
+        if (rollDice >= 0 && rollDice < dices) {
           this.sequence.add(rollDice);
         }
       } catch (NumberFormatException ignored) {
