@@ -122,8 +122,8 @@ public class EntropySequence {
 
   private void setBinaryFile(File binaryFile, byte[] binaryData) {
     this.entropySequenceSource = EntropySequenceSource.BINARY_FILE;
-    this.binaryFile = binaryFile;
-    this.binaryData = binaryData;
+    this.binaryFile = new File(binaryFile.getAbsolutePath());
+    this.binaryData = binaryData.clone();
 
     this.sequenceRadix = 256;
     this.sequence = new LinkedList<>();
@@ -160,15 +160,15 @@ public class EntropySequence {
   }
 
   public List<Integer> getSequence() {
-    return sequence;
+    return new ArrayList<>(sequence);
   }
 
   public File getBinaryFile() {
-    return binaryFile;
+    return new File(binaryFile.getAbsolutePath());
   }
 
   public byte[] getBinaryData() {
-    return binaryData;
+    return binaryData.clone();
   }
 
   public String getText() {

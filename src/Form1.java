@@ -476,6 +476,7 @@ public class Form1 {
             ((CardLayout) panelMain.getLayout()).first(panelMain);
 
             passwordProgressBar.setValue(0);
+            getMyPasswordButton.setEnabled(false);
             DefaultTableModel model = (DefaultTableModel) tableEntropySequences.getModel();
             while (model.getRowCount() > 0) {
               model.removeRow(0);
@@ -532,7 +533,7 @@ public class Form1 {
         e -> {
           int len = (Integer) (rollDicesRadixSpinner.getValue());
           if (len < 2) {
-            pwdLenSpinner.setValue(2);
+            rollDicesRadixSpinner.setValue(2);
           }
         });
 
@@ -604,13 +605,7 @@ public class Form1 {
                 if (entropySequence.getEntropySequenceSource()
                     == EntropySequenceSource.ROLL_DICES) {
                   rollDicesRadixSpinner.setValue(entropySequence.getSequenceRadix());
-                  rollDicesTextPane.setText(
-                      entropySequence
-                          .getSequence()
-                          .stream()
-                          .map(x -> x + 1)
-                          .collect(Collectors.toList())
-                          .toString());
+                  rollDicesTextPane.setText(entropySequence.getRollDices());
                   return;
                 }
                 ((CardLayout) cardAddEntropy.getLayout()).next(cardAddEntropy);
@@ -770,18 +765,7 @@ public class Form1 {
                                   .intValue()));
 
               passwordProgressBar.setValue(percentDone);
-
-              /*DefaultTableModel model = (DefaultTableModel) e.getSource();
-              int minPassLen = 0;
-              for (int i = 0; i < model.getRowCount(); i++) {
-                Object val = model.getValueAt(i, 1);
-                minPassLen += (Integer) val;
-              }
-              minimalPasswordLength.setText(String.valueOf(minPassLen));
-
-              TableOfPresetChars tableOfPresetChars = new TableOfPresetChars();
-              assignTableOfPresetChars(tableOfPresetChars);
-              caNextButton.setEnabled(tableOfPresetChars.produceCharacterSet().size() > 1)*/ ;
+              getMyPasswordButton.setEnabled(percentDone == passwordProgressBar.getMaximum());
             });
   }
 
