@@ -32,11 +32,14 @@ import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.bind.JAXBContext;
+import sequence.radix.converter.ISequenceRadixConverterFabric.SequenceRadixConverter;
+import sequence.radix.converter.SequenceRadixConverterFabricInteger;
 
 public class Form1 {
 
   private static final int MAXIMUM_BINARY_DATA_TO_READ = 100000;
   private static final int MAXIMUM_BINARY_DATA_TO_PREVIEW = 1000;
+  public static final int INTERMEDIATE_RADIX_SEQUENCE = 3;
   private File binaryFile;
   private byte[] binaryData;
   private Integer editableRow;
@@ -676,6 +679,96 @@ public class Form1 {
             JOptionPane.showMessageDialog(panelMain, "No rows selected!");
           }
         });
+
+    tableEntropySequences
+        .getModel()
+        .addTableModelListener(
+            e -> {
+              SequenceRadixConverterFabricInteger fab = new SequenceRadixConverterFabricInteger();
+
+              List<Integer> ternary = new ArrayList<>();
+              for (int i = 0; i < tableEntropySequences.getRowCount(); i++) {
+                EntropySequence entropySequence =
+                    (EntropySequence) tableEntropySequences.getValueAt(i, 1);
+                if (entropySequence.isValid()) {
+                  SequenceRadixConverter<Integer> conv =
+                      fab.create(entropySequence.getSequenceRadix(), INTERMEDIATE_RADIX_SEQUENCE);
+                  ternary.addAll(conv.convert(entropySequence.getSequence()));
+                }
+              }
+
+              if (ternary.isEmpty()) {
+                passwordProgressBar.setValue(passwordProgressBar.getMinimum());
+                return;
+              }
+
+              int done = 0;
+              TableOfPresetChars tableOfPresetChars = new TableOfPresetChars();
+              assignTableOfPresetChars(tableOfPresetChars);
+
+              if (tableOfPresetChars.getTableOfPresetChars().isEmpty()) {
+                passwordProgressBar.setValue(passwordProgressBar.getMinimum());
+                return;
+              }
+
+              List<PresetChars> restrictedPresetChars =
+                  tableOfPresetChars
+                      .getTableOfPresetChars()
+                      .stream()
+                      .filter(PresetChars::isValid)
+                      .filter(x -> x.getMinimalOccurences() > 0)
+                      .collect(Collectors.toList());
+              for (PresetChars presetChars : restrictedPresetChars) {
+                if (ternary.isEmpty()) {
+                  break;
+                }
+                int inc =
+                    fab.create(
+                            INTERMEDIATE_RADIX_SEQUENCE, presetChars.produceCharacterSet().size())
+                        .convert(ternary, presetChars.getMinimalOccurences())
+                        .size();
+                if (inc == 0) {
+                  break;
+                }
+                done += inc;
+              }
+
+              int targetLen = (Integer) pwdLenSpinner.getValue();
+              done +=
+                  fab.create(
+                          INTERMEDIATE_RADIX_SEQUENCE,
+                          tableOfPresetChars.produceCharacterSet().size())
+                      .convert(ternary, targetLen - done)
+                      .size();
+
+              int percentDone =
+                  Math.max(
+                      passwordProgressBar.getMinimum(),
+                      Math.min(
+                          passwordProgressBar.getMaximum(),
+                          passwordProgressBar.getMinimum()
+                              + ((Double)
+                                      (((double)
+                                              (passwordProgressBar.getMaximum()
+                                                  - passwordProgressBar.getMinimum()))
+                                          * ((double) done)
+                                          / ((double) targetLen)))
+                                  .intValue()));
+
+              passwordProgressBar.setValue(percentDone);
+
+              /*DefaultTableModel model = (DefaultTableModel) e.getSource();
+              int minPassLen = 0;
+              for (int i = 0; i < model.getRowCount(); i++) {
+                Object val = model.getValueAt(i, 1);
+                minPassLen += (Integer) val;
+              }
+              minimalPasswordLength.setText(String.valueOf(minPassLen));
+
+              TableOfPresetChars tableOfPresetChars = new TableOfPresetChars();
+              assignTableOfPresetChars(tableOfPresetChars);
+              caNextButton.setEnabled(tableOfPresetChars.produceCharacterSet().size() > 1)*/ ;
+            });
   }
 
   private void entropyEditorBackButton() {

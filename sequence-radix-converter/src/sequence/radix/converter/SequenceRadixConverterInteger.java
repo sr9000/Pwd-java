@@ -57,7 +57,7 @@ public class SequenceRadixConverterInteger
   @Override
   public List<Integer> convert(List<Integer> srcSequence, Integer targetCount) {
     int takeNumber = 0;
-    List<Integer> result = null;
+    List<Integer> result = new LinkedList<>();
     do {
       if (takeNumber + 1 > srcSequence.size()) {
         break;
@@ -67,6 +67,9 @@ public class SequenceRadixConverterInteger
     } while (result.size() < targetCount);
     for (int i = 0; i < takeNumber; i++) {
       srcSequence.remove(0);
+    }
+    if (targetCount > result.size()) {
+      result = result.subList(0, targetCount);
     }
     return result;
   }
