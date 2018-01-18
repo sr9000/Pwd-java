@@ -1,14 +1,25 @@
+import com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
 import configuration.PresetChars;
 import configuration.TableOfPresetChars;
 import data.holder.EntropySequence;
 import data.holder.EntropySequence.EntropySequenceSource;
 import java.awt.CardLayout;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.CryptoPrimitive;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -18,6 +29,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -34,12 +46,19 @@ import javax.swing.table.DefaultTableModel;
 import javax.xml.bind.JAXBContext;
 import sequence.radix.converter.ISequenceRadixConverterFabric.SequenceRadixConverter;
 import sequence.radix.converter.SequenceRadixConverterFabricInteger;
+import special.data.UTF8_ENCODER;
+import special.data.UTF8_ENCODER.EncoderOverflowException;
 
 public class Form1 {
 
+  private static final int ITS_OVER_9000 = 9000;
   private static final int MAXIMUM_BINARY_DATA_TO_READ = 100000;
   private static final int MAXIMUM_BINARY_DATA_TO_PREVIEW = 1000;
   public static final int INTERMEDIATE_RADIX_SEQUENCE = 3;
+  private char[] aaa34349500f063 = new char[2];
+  private int totalaaa34349500f063 = 0;
+  private boolean foreverUnsecure = false;
+  private char[] prod = new char[2];
   private File binaryFile;
   private byte[] binaryData;
   private Integer editableRow;
@@ -112,13 +131,18 @@ public class Form1 {
   private JButton saveAsFileButton;
   private JButton generateNewPasswordButton;
   private JCheckBox viewPasswordCheckBox;
-  private JTextPane textPane5;
+  private JTextPane previewPassTextPane;
   private JCheckBox encodeWithBase64CheckBox;
   private JCheckBox encryptionAES256CheckBox;
   private JPasswordField passwordField1;
   private JPasswordField passwordField2;
   private JTextArea binaryDataTextPane;
   private JTextArea rollDicesTextPane;
+  private JRadioButton MD5KDFPKCS5v1RadioButton;
+  private JRadioButton PBKDF2PKCS5v21RadioButton;
+  private JLabel aesComment1;
+  private JLabel aesComment2;
+  private JLabel aesComment3;
 
   public Form1() {
 
@@ -467,6 +491,7 @@ public class Form1 {
     getMyPasswordButton.addActionListener(
         e -> {
           if (panelMain.getLayout() instanceof CardLayout) {
+            a22f0d441128df60();
             ((CardLayout) panelMain.getLayout()).last(panelMain);
           }
         });
@@ -477,6 +502,14 @@ public class Form1 {
 
             passwordProgressBar.setValue(0);
             getMyPasswordButton.setEnabled(false);
+            this.totalaaa34349500f063 = 0;
+            clearWithRandom(new SecureRandom(), this.aaa34349500f063);
+            clearWithRandom(new SecureRandom(), this.prod);
+            foreverUnsecure = false;
+            previewPassTextPane.setText("");
+            passwordField1.setText("");
+            passwordField2.setText("");
+
             DefaultTableModel model = (DefaultTableModel) tableEntropySequences.getModel();
             while (model.getRowCount() > 0) {
               model.removeRow(0);
@@ -526,6 +559,9 @@ public class Form1 {
           int minLen = Integer.max(1, Integer.parseInt(minimalPasswordLength.getText()));
           if (len < minLen) {
             pwdLenSpinner.setValue(minLen);
+          }
+          if (len > ITS_OVER_9000) {
+            pwdLenSpinner.setValue(ITS_OVER_9000);
           }
         });
 
@@ -694,15 +730,7 @@ public class Form1 {
               }
 
               List<Integer> ternary = new ArrayList<>();
-              for (int i = 0; i < tableEntropySequences.getRowCount(); i++) {
-                EntropySequence entropySequence =
-                    (EntropySequence) tableEntropySequences.getValueAt(i, 1);
-                if (entropySequence.isValid()) {
-                  SequenceRadixConverter<Integer> conv =
-                      fab.create(entropySequence.getSequenceRadix(), INTERMEDIATE_RADIX_SEQUENCE);
-                  ternary.addAll(conv.convert(entropySequence.getSequence()));
-                }
-              }
+              assignTernarySequenceFromEntropy(fab, ternary);
 
               if (ternary.isEmpty()) {
                 passwordProgressBar.setValue(passwordProgressBar.getMinimum());
@@ -719,12 +747,7 @@ public class Form1 {
               }
 
               List<PresetChars> restrictedPresetChars =
-                  tableOfPresetChars
-                      .getTableOfPresetChars()
-                      .stream()
-                      .filter(PresetChars::isValid)
-                      .filter(x -> x.getMinimalOccurences() > 0)
-                      .collect(Collectors.toList());
+                  getRestrictedPresetChars(tableOfPresetChars);
               for (PresetChars presetChars : restrictedPresetChars) {
                 if (ternary.isEmpty()) {
                   break;
@@ -767,6 +790,275 @@ public class Form1 {
               passwordProgressBar.setValue(percentDone);
               getMyPasswordButton.setEnabled(percentDone == passwordProgressBar.getMaximum());
             });
+
+    encryptionAES256CheckBox.addItemListener(
+        e -> {
+          if (e.getStateChange() == ItemEvent.SELECTED) {
+            encodeWithBase64CheckBox.setSelected(true);
+            encodeWithBase64CheckBox.setEnabled(false);
+            setAesVisibility(true);
+          } else if (e.getStateChange() == ItemEvent.DESELECTED) {
+            encodeWithBase64CheckBox.setEnabled(true);
+            setAesVisibility(false);
+          }
+          generatePasswordAction();
+        });
+    viewPasswordCheckBox.addItemListener(
+        e -> {
+          generatePasswordAction();
+        });
+    encodeWithBase64CheckBox.addActionListener(e -> generatePasswordAction());
+    MD5KDFPKCS5v1RadioButton.addActionListener(e -> generatePasswordAction());
+    PBKDF2PKCS5v21RadioButton.addActionListener(e -> generatePasswordAction());
+    passwordField1.addActionListener(e -> generatePasswordAction());
+    passwordField2.addActionListener(e -> generatePasswordAction());
+    passwordField1.addFocusListener(
+        new FocusAdapter() {
+          @Override
+          public void focusGained(FocusEvent e) {
+            super.focusGained(e);
+          }
+
+          @Override
+          public void focusLost(FocusEvent e) {
+            super.focusLost(e);
+            generatePasswordAction();
+          }
+        });
+    passwordField2.addFocusListener(
+        new FocusAdapter() {
+          @Override
+          public void focusGained(FocusEvent e) {
+            super.focusGained(e);
+          }
+
+          @Override
+          public void focusLost(FocusEvent e) {
+            super.focusLost(e);
+            generatePasswordAction();
+          }
+        });
+  }
+
+  private void generatePasswordAction() {
+    if (encryptionAES256CheckBox.isSelected()) {
+      if (!Arrays.equals(passwordField1.getPassword(), passwordField2.getPassword())) {
+        previewPassTextPane.setText("Master password and confirm master password are different.");
+        return;
+      } else {
+        previewPassTextPane.setText("Master password is successfully confirmed.");
+      }
+    } else {
+      previewPassTextPane.setText("");
+    }
+
+    clearWithRandom(new SecureRandom(), prod);
+    byte[] arr1 = new byte[2];
+    byte[] arr2 = new byte[2];
+    if (encryptionAES256CheckBox.isSelected()) {
+      // byte routine
+    } else {
+      // char routine
+      if (encodeWithBase64CheckBox.isSelected()) {
+        // encode
+        arr1 = chars2bytes(this.aaa34349500f063.clone(), this.totalaaa34349500f063);
+        arr2 = Base64.getEncoder().encode(arr1);
+        prod = bytes2chars(arr2);
+      } else {
+        prod = new char[totalaaa34349500f063];
+        System.arraycopy(this.aaa34349500f063, 0, this.prod, 0, totalaaa34349500f063);
+      }
+    }
+    clearWithRandom(new SecureRandom(), arr1);
+    clearWithRandom(new SecureRandom(), arr2);
+
+    if (viewPasswordCheckBox.isSelected()) {
+      if (foreverUnsecure || encryptionAES256CheckBox.isSelected()) {
+        previewPassTextPane.setText(new String(prod));
+      } else {
+        int answer =
+            JOptionPane.showConfirmDialog(
+                panelMain,
+                "If you make the password visible once, "
+                    + "it will forever fall into unsecured memory.\n"
+                    + "Are you REALLY sure, that you want to show it now?",
+                "Confirm make password visible.",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (answer == JOptionPane.YES_OPTION) {
+          foreverUnsecure = true;
+          viewPasswordCheckBox.setSelected(true);
+          previewPassTextPane.setText(new String(prod));
+        }
+      }
+    }
+  }
+
+  private char[] bytes2chars(byte[] arr) {
+    char[] res = new char[arr.length];
+
+    for (int i = 0; i < arr.length; i++) {
+      res[i] = (char) arr[i];
+    }
+
+    return res;
+  }
+
+  private byte[] chars2bytes(char[] chArr, int meanfullCount) {
+
+    char[] chArrMn = new char[meanfullCount];
+    System.arraycopy(chArr, 0, chArrMn, 0, meanfullCount);
+
+    int l = 0;
+    int r = 8 * meanfullCount;
+    while (l < r) {
+      int m = (l + r) / 2;
+      byte[] btArr2 = new byte[m];
+      try {
+        UTF8_ENCODER.encodeArrayLoop(chArrMn, btArr2);
+      } catch (EncoderOverflowException ignored) {
+        l = m + 1;
+        continue;
+      } finally {
+        clearWithRandom(new SecureRandom(), btArr2);
+      }
+      r = m;
+    }
+
+    byte[] arr = new byte[l];
+    try {
+      UTF8_ENCODER.encodeArrayLoop(chArrMn, arr);
+    } catch (EncoderOverflowException ignored) {
+    } finally {
+      clearWithRandom(new SecureRandom(), chArrMn);
+    }
+
+    return arr;
+  }
+
+  private void setAesVisibility(boolean visible) {
+    aesComment1.setEnabled(visible);
+    aesComment2.setEnabled(visible);
+    aesComment3.setEnabled(visible);
+
+    passwordField1.setEnabled(visible);
+    passwordField2.setEnabled(visible);
+
+    MD5KDFPKCS5v1RadioButton.setEnabled(visible);
+    PBKDF2PKCS5v21RadioButton.setEnabled(visible);
+  }
+
+  private List<PresetChars> getRestrictedPresetChars(TableOfPresetChars tableOfPresetChars) {
+    return tableOfPresetChars
+        .getTableOfPresetChars()
+        .stream()
+        .filter(PresetChars::isValid)
+        .filter(x -> x.getMinimalOccurences() > 0)
+        .collect(Collectors.toList());
+  }
+
+  private void assignTernarySequenceFromEntropy(
+      SequenceRadixConverterFabricInteger fab, List<Integer> ternary) {
+    for (int i = 0; i < tableEntropySequences.getRowCount(); i++) {
+      EntropySequence entropySequence = (EntropySequence) tableEntropySequences.getValueAt(i, 1);
+      if (entropySequence.isValid()) {
+        SequenceRadixConverter<Integer> conv =
+            fab.create(entropySequence.getSequenceRadix(), INTERMEDIATE_RADIX_SEQUENCE);
+        ternary.addAll(conv.convert(entropySequence.getSequence()));
+      }
+    }
+  }
+
+  private void a22f0d441128df60() {
+    byte[] bt = new byte[1024];
+    SecureRandom rnd = new SecureRandom();
+    for (int i = 0; i < 1000; ++i) {
+      rnd.nextBytes(bt);
+      rnd = new SecureRandom(bt.clone());
+    }
+
+    if (this.aaa34349500f063 != null) {
+      clearWithRandom(rnd, this.aaa34349500f063);
+    }
+
+    this.aaa34349500f063 = new char[(int) pwdLenSpinner.getValue()];
+
+    SequenceRadixConverterFabricInteger fab = new SequenceRadixConverterFabricInteger();
+
+    List<Integer> ternary = new ArrayList<>();
+    assignTernarySequenceFromEntropy(fab, ternary);
+
+    TableOfPresetChars tableOfPresetChars = new TableOfPresetChars();
+    assignTableOfPresetChars(tableOfPresetChars);
+
+    List<PresetChars> restrictedPresetChars = getRestrictedPresetChars(tableOfPresetChars);
+
+    int[] indInd2 = new int[] {0, 0};
+
+    for (PresetChars presetChars : restrictedPresetChars) {
+      List<String> set = presetChars.produceCharacterSet();
+      Collections.shuffle(set, rnd);
+
+      List<Integer> assignations =
+          fab.create(INTERMEDIATE_RADIX_SEQUENCE, set.size())
+              .convert(ternary, presetChars.getMinimalOccurences());
+      if (assignations.size() == 0) {
+        break;
+      }
+
+      fill1a0b3a1a2a99b7ea(rnd, indInd2, set, assignations);
+    }
+
+    int targetLen = (Integer) pwdLenSpinner.getValue();
+    if (targetLen > indInd2[0]) {
+      List<String> set = tableOfPresetChars.produceCharacterSet();
+      Collections.shuffle(set, rnd);
+
+      List<Integer> assignations =
+          fab.create(INTERMEDIATE_RADIX_SEQUENCE, set.size())
+              .convert(ternary, targetLen - indInd2[0]);
+
+      fill1a0b3a1a2a99b7ea(rnd, indInd2, set, assignations);
+    }
+
+    totalaaa34349500f063 = indInd2[1];
+  }
+
+  private void clearWithRandom(SecureRandom rnd, char[] arr) {
+    for (int j = 0; j < 1000; j++) {
+      for (int i = 0; i < arr.length; i++) {
+        arr[i] = (char) rnd.nextInt();
+      }
+    }
+  }
+
+  private void clearWithRandom(SecureRandom rnd, byte[] arr) {
+    for (int j = 0; j < 1000; j++) {
+      for (int i = 0; i < arr.length; i++) {
+        arr[i] = (byte) rnd.nextInt();
+      }
+    }
+  }
+
+  private void fill1a0b3a1a2a99b7ea(
+      SecureRandom rnd, int[] indInd2, List<String> set, List<Integer> assignations) {
+    for (int choose : assignations) {
+      String choosed = set.get(choose);
+
+      while (this.aaa34349500f063.length - indInd2[1] < choosed.length()) {
+        char[] arr = new char[this.aaa34349500f063.length * 2 + 1];
+        System.arraycopy(this.aaa34349500f063, 0, arr, 0, indInd2[1]);
+        clearWithRandom(rnd, this.aaa34349500f063);
+        this.aaa34349500f063 = arr;
+      }
+
+      for (char ch : choosed.toCharArray()) {
+        this.aaa34349500f063[indInd2[1]] = ch;
+        indInd2[1]++;
+      }
+      indInd2[0]++;
+    }
   }
 
   private void entropyEditorBackButton() {
