@@ -1,16 +1,24 @@
 package form1;
 
+import configuration.Aes256CbcEncryptedPassword;
 import configuration.PresetChars;
 import configuration.TableOfPresetChars;
 import dataholder.EntropySequence;
 import dataholder.EntropySequence.EntropySequenceSource;
 import java.awt.CardLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -57,12 +65,15 @@ import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import sequence.radix.converter.ISequenceRadixConverterFabric.SequenceRadixConverter;
 import sequence.radix.converter.SequenceRadixConverterFabricInteger;
 import special.data.UTF8_ENCODER;
 import special.data.UTF8_ENCODER.EncoderOverflowException;
 import special.math.Randomness;
+import special.security.DestroyableSecretKeySpec;
 import special.security.OpenSSLDecryptor;
+import special.security.PBKDF2HmacSHA256;
 
 public class Form1 {
 
@@ -77,6 +88,9 @@ public class Form1 {
   public static final String AES_CBC_PKCS5_PADDING = "AES/CBC/PKCS5Padding";
   public static final String MD5 = "MD5";
   public static final String SHA256 = "SHA256";
+  public static final String EVP_BYTES_TO_KEY = "EVP_BytesToKey";
+  public static final String PBKDF2 = "PBKDF2";
+  public static final String HMAC_SHA256 = "HmacSHA256";
   private char[] aaa34349500f063 = new char[2];
   private byte[] initializationVector = new byte[2];
   private byte[] salt = new byte[2];
@@ -874,6 +888,58 @@ public class Form1 {
             generatePasswordAction();
           }
         });
+
+    copyToClipboardButton.addActionListener(
+        e -> {
+          String clipBoard = null;
+          if (encryptionAES256CheckBox.isSelected()) {
+            if (!this.successfullEncryption) {
+              JOptionPane.showMessageDialog(
+                  panelMain, "Password should be first successfully encrypted!");
+              return;
+            }
+            Aes256CbcEncryptedPassword data = new Aes256CbcEncryptedPassword();
+            assignAes256CbcEncryptedPassword(data);
+
+            JAXBContext jaxbContext = null;
+            try {
+              jaxbContext = JAXBContext.newInstance(Aes256CbcEncryptedPassword.class);
+              StringWriter result = new StringWriter();
+              jaxbContext.createMarshaller().marshal(data, result);
+              clipBoard = result.toString();
+            } catch (JAXBException ex) {
+              JOptionPane.showMessageDialog(
+                  panelMain,
+                  ex.toString(),
+                  "Exception copy to Clipboard",
+                  JOptionPane.ERROR_MESSAGE);
+            }
+          } else {
+            clipBoard = String.valueOf(prod);
+          }
+
+          StringSelection selection = new StringSelection(clipBoard);
+          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+          clipboard.setContents(selection, selection);
+        });
+  }
+
+  private void assignAes256CbcEncryptedPassword(Aes256CbcEncryptedPassword data) {
+    data.encryptedData = String.valueOf(prod);
+    data.initializationVector =
+        String.valueOf(bytes2chars(Base64.getEncoder().encode(this.initializationVector)));
+    data.saltForKeyDerivationFunction =
+        String.valueOf(bytes2chars(Base64.getEncoder().encode(this.salt)));
+    if (MD5KDFPKCS5v1RadioButton.isSelected()) {
+      data.keyDerivationFunction = EVP_BYTES_TO_KEY;
+      data.messageDigestFunction = MD5;
+    } else if (SHA256KDFPKCS5v1RadioButton.isSelected()) {
+      data.keyDerivationFunction = EVP_BYTES_TO_KEY;
+      data.messageDigestFunction = SHA256;
+    } else {
+      data.keyDerivationFunction = PBKDF2;
+      data.messageDigestFunction = HMAC_SHA256;
+    }
   }
 
   private void generatePasswordAction() {
@@ -907,7 +973,7 @@ public class Form1 {
       } else if (SHA256KDFPKCS5v1RadioButton.isSelected()) {
         arr1 = MD_KDFPKCS5v1Routine(arr3.clone(), arr4.clone(), SHA256);
       } else {
-        arr1 = PBKDF2PKCS5v21Routine(arr3.clone(), passwordField1.getPassword().clone());
+        arr1 = PBKDF2PKCS5v21Routine(arr3.clone(), arr4.clone());
       }
     } else {
       arr1 = chars2bytes(this.aaa34349500f063.clone(), this.totalaaa34349500f063);
@@ -947,18 +1013,20 @@ public class Form1 {
     }
   }
 
-  private byte[] PBKDF2PKCS5v21Routine(byte[] aaa, char[] masterPassword) {
+  private byte[] PBKDF2PKCS5v21Routine(byte[] aaa, byte[] masterPassword) {
     byte[] ciphertext = new byte[0];
-    SecretKey tmp = null;
-    SecretKey secret = null;
+    DestroyableSecretKeySpec secret = null;
     try {
       this.salt = new SecureRandom().generateSeed(8);
 
-      SecretKeyFactory factory = SecretKeyFactory.getInstance(PBKDF_2_WITH_HMAC_SHA_256);
-      KeySpec spec = new PBEKeySpec(masterPassword, this.salt, PBKDF2Iterations, AESKeyLength);
+      // SecretKeyFactory factory = SecretKeyFactory.getInstance(PBKDF_2_WITH_HMAC_SHA_256);
+      // KeySpec spec = new PBEKeySpec(masterPassword, this.salt, PBKDF2Iterations, AESKeyLength);
 
-      tmp = factory.generateSecret(spec);
-      secret = new SecretKeySpec(tmp.getEncoded(), AES);
+      byte[] keyEncoded =
+          PBKDF2HmacSHA256.deriveKey(
+              masterPassword.clone(), this.salt, PBKDF2Iterations, AESKeyLength);
+      secret = new DestroyableSecretKeySpec(keyEncoded, AES);
+      clearWithRandom(new SecureRandom(), keyEncoded);
 
       Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5_PADDING);
       cipher.init(Cipher.ENCRYPT_MODE, secret);
@@ -969,7 +1037,6 @@ public class Form1 {
       ciphertext = cipher.doFinal(aaa);
 
     } catch (NoSuchAlgorithmException
-        | InvalidKeySpecException
         | NoSuchPaddingException
         | IllegalBlockSizeException
         | InvalidParameterSpecException
@@ -980,27 +1047,8 @@ public class Form1 {
       JOptionPane.showMessageDialog(
           panelMain, ex.toString(), "Exception aes encryption (PBKDF2)", JOptionPane.ERROR_MESSAGE);
     } finally {
-      try {
-        if (tmp != null) {
-          tmp.destroy();
-        }
-      } catch (DestroyFailedException ex) {
-        JOptionPane.showMessageDialog(
-            panelMain,
-            ex.toString(),
-            "Exception aes encryption (PBKDF2)",
-            JOptionPane.ERROR_MESSAGE);
-      }
-      try {
-        if (secret != null) {
-          secret.destroy();
-        }
-      } catch (DestroyFailedException ex) {
-        JOptionPane.showMessageDialog(
-            panelMain,
-            ex.toString(),
-            "Exception aes encryption (PBKDF2)",
-            JOptionPane.ERROR_MESSAGE);
+      if (secret != null && !secret.isDestroyed()) {
+        secret.destroy();
       }
     }
 
@@ -1012,14 +1060,14 @@ public class Form1 {
 
   private byte[] MD_KDFPKCS5v1Routine(byte[] aaa, byte[] masterPassword, String nameMD) {
     byte[] cipherText = new byte[0];
-    SecretKeySpec key = null;
+    DestroyableSecretKeySpec key = null;
     byte[][] keyAndIV = null;
     try {
       this.salt = new SecureRandom().generateSeed(8);
 
       MessageDigest md = MessageDigest.getInstance(nameMD);
       keyAndIV = OpenSSLDecryptor.openSSLEVP(this.salt, masterPassword, md);
-      key = new SecretKeySpec(keyAndIV[OpenSSLDecryptor.INDEX_KEY].clone(), AES);
+      key = new DestroyableSecretKeySpec(keyAndIV[OpenSSLDecryptor.INDEX_KEY].clone(), AES);
       IvParameterSpec iv = new IvParameterSpec(keyAndIV[OpenSSLDecryptor.INDEX_IV].clone());
 
       Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5_PADDING);
@@ -1044,16 +1092,8 @@ public class Form1 {
           "Exception aes encryption (" + nameMD + ")",
           JOptionPane.ERROR_MESSAGE);
     } finally {
-      try {
-        if (key != null) {
-          key.destroy();
-        }
-      } catch (DestroyFailedException ex) {
-        JOptionPane.showMessageDialog(
-            panelMain,
-            ex.toString(),
-            "Exception aes encryption (" + nameMD + ")",
-            JOptionPane.ERROR_MESSAGE);
+      if (key != null && !key.isDestroyed()) {
+        key.destroy();
       }
     }
 
