@@ -48,6 +48,7 @@ import sequence.radix.converter.ISequenceRadixConverterFabric.SequenceRadixConve
 import sequence.radix.converter.SequenceRadixConverterFabricInteger;
 import special.data.UTF8_ENCODER;
 import special.data.UTF8_ENCODER.EncoderOverflowException;
+import special.math.Randomness;
 
 public class Form1 {
 
@@ -141,8 +142,12 @@ public class Form1 {
   private JRadioButton MD5KDFPKCS5v1RadioButton;
   private JRadioButton PBKDF2PKCS5v21RadioButton;
   private JLabel aesComment1;
+  private JTextArea aesComment7;
   private JLabel aesComment2;
   private JLabel aesComment3;
+  private JLabel aesComment4;
+  private JLabel aesComment5;
+  private JLabel aesComment6;
 
   public Form1() {
 
@@ -939,8 +944,10 @@ public class Form1 {
 
   private void setAesVisibility(boolean visible) {
     aesComment1.setEnabled(visible);
-    aesComment2.setEnabled(visible);
-    aesComment3.setEnabled(visible);
+    aesComment4.setEnabled(visible);
+    aesComment5.setEnabled(visible);
+    aesComment6.setEnabled(visible);
+    aesComment7.setEnabled(visible);
 
     passwordField1.setEnabled(visible);
     passwordField2.setEnabled(visible);
@@ -1022,7 +1029,9 @@ public class Form1 {
       fill1a0b3a1a2a99b7ea(rnd, indInd2, set, assignations);
     }
 
-    totalaaa34349500f063 = indInd2[1];
+    Randomness.shuffleArray(rnd, this.aaa34349500f063);
+
+    this.totalaaa34349500f063 = indInd2[1];
   }
 
   private void clearWithRandom(SecureRandom rnd, char[] arr) {

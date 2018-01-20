@@ -1,5 +1,6 @@
 package special.math;
 
+import java.security.SecureRandom;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
@@ -65,6 +66,33 @@ public class Randomness {
       return null;
     } else {
       return new SimpleEntry<>(l, r + 1);
+    }
+  }
+
+  public static void shuffleArray(SecureRandom rnd, char[] arr) {
+    if (arr.length < 2) {
+      return;
+    }
+
+    long[] rarr = new long[arr.length];
+    for (int i = 0; i < rarr.length; i++) {
+      rarr[i] = rnd.nextLong();
+    }
+
+    // bubble sort
+    long tlong;
+    char tchar;
+    for (int k = 1; k < rarr.length; k++) {
+      for (int i = 0; i < rarr.length - k; i++) {
+        if (rarr[i] > rarr[i + 1]) {
+          tlong = rarr[i];
+          tchar = arr[i];
+          rarr[i] = rarr[i + 1];
+          arr[i] = arr[i + 1];
+          rarr[i + 1] = tlong;
+          arr[i + 1] = tchar;
+        }
+      }
     }
   }
 }
