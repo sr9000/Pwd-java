@@ -69,7 +69,7 @@ public class Randomness {
     }
   }
 
-  public static void shuffleArray(SecureRandom rnd, char[] arr) {
+  public static void shuffleArray(SecureRandom rnd, char[][] arr) {
     if (arr.length < 2) {
       return;
     }
@@ -81,7 +81,7 @@ public class Randomness {
 
     // bubble sort
     long tlong;
-    char tchar;
+    char[] tchar;
     for (int k = 1; k < rarr.length; k++) {
       for (int i = 0; i < rarr.length - k; i++) {
         if (rarr[i] > rarr[i + 1]) {

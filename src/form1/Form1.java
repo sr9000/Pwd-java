@@ -1305,7 +1305,8 @@ public class Form1 {
       clearWithRandom(rnd, this.aaa34349500f063);
     }
 
-    this.aaa34349500f063 = new char[(int) pwdLenSpinner.getValue()];
+    // this.aaa34349500f063 = new char[(int) pwdLenSpinner.getValue()];
+    char[][] arrArr = new char[(int) pwdLenSpinner.getValue()][];
 
     SequenceRadixConverterFabricInteger fab = new SequenceRadixConverterFabricInteger();
 
@@ -1330,7 +1331,7 @@ public class Form1 {
         break;
       }
 
-      fill1a0b3a1a2a99b7ea(rnd, indInd2, set, assignations);
+      fill1a0b3a1a2a99b7ea(indInd2, set, assignations, arrArr);
     }
 
     int targetLen = (Integer) pwdLenSpinner.getValue();
@@ -1342,12 +1343,19 @@ public class Form1 {
           fab.create(INTERMEDIATE_RADIX_SEQUENCE, set.size())
               .convert(ternary, targetLen - indInd2[0]);
 
-      fill1a0b3a1a2a99b7ea(rnd, indInd2, set, assignations);
+      fill1a0b3a1a2a99b7ea(indInd2, set, assignations, arrArr);
     }
 
-    Randomness.shuffleArray(rnd, this.aaa34349500f063);
+    Randomness.shuffleArray(rnd, arrArr);
 
     this.totalaaa34349500f063 = indInd2[1];
+    this.aaa34349500f063 = new char[indInd2[1]];
+    int ind = 0;
+    for (int i = 0; i < indInd2[0]; i++) {
+      System.arraycopy(arrArr[i], 0, this.aaa34349500f063, ind, arrArr[i].length);
+      ind += arrArr[i].length;
+      clearWithRandom(rnd, arrArr[i]);
+    }
   }
 
   private void clearWithRandom(SecureRandom rnd, char[] arr) {
@@ -1367,21 +1375,15 @@ public class Form1 {
   }
 
   private void fill1a0b3a1a2a99b7ea(
-      SecureRandom rnd, int[] indInd2, List<String> set, List<Integer> assignations) {
+      int[] indInd2,
+      List<String> set,
+      List<Integer> assignations,
+      char[][] arrArr) {
     for (int choose : assignations) {
       String choosed = set.get(choose);
+      arrArr[indInd2[0]] = choosed.toCharArray();
 
-      while (this.aaa34349500f063.length - indInd2[1] < choosed.length()) {
-        char[] arr = new char[this.aaa34349500f063.length * 2 + 1];
-        System.arraycopy(this.aaa34349500f063, 0, arr, 0, indInd2[1]);
-        clearWithRandom(rnd, this.aaa34349500f063);
-        this.aaa34349500f063 = arr;
-      }
-
-      for (char ch : choosed.toCharArray()) {
-        this.aaa34349500f063[indInd2[1]] = ch;
-        indInd2[1]++;
-      }
+      indInd2[1] += choosed.length();
       indInd2[0]++;
     }
   }
