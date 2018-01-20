@@ -9,25 +9,22 @@ import java.awt.CardLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
-import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -36,16 +33,13 @@ import java.util.List;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.DestroyFailedException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -891,37 +885,142 @@ public class Form1 {
 
     copyToClipboardButton.addActionListener(
         e -> {
-          String clipBoard = null;
-          if (encryptionAES256CheckBox.isSelected()) {
-            if (!this.successfullEncryption) {
-              JOptionPane.showMessageDialog(
-                  panelMain, "Password should be first successfully encrypted!");
-              return;
-            }
-            Aes256CbcEncryptedPassword data = new Aes256CbcEncryptedPassword();
-            assignAes256CbcEncryptedPassword(data);
-
-            JAXBContext jaxbContext = null;
-            try {
-              jaxbContext = JAXBContext.newInstance(Aes256CbcEncryptedPassword.class);
-              StringWriter result = new StringWriter();
-              jaxbContext.createMarshaller().marshal(data, result);
-              clipBoard = result.toString();
-            } catch (JAXBException ex) {
-              JOptionPane.showMessageDialog(
-                  panelMain,
-                  ex.toString(),
-                  "Exception copy to Clipboard",
-                  JOptionPane.ERROR_MESSAGE);
-            }
-          } else {
-            clipBoard = String.valueOf(prod);
+          String[] clipBoard = new String[1];
+          Aes256CbcEncryptedPassword[] clipPass = new Aes256CbcEncryptedPassword[1];
+          if (!passToString(clipBoard, clipPass)) {
+            return;
           }
 
-          StringSelection selection = new StringSelection(clipBoard);
+          StringSelection selection = new StringSelection(clipBoard[0]);
           Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
           clipboard.setContents(selection, selection);
         });
+    saveAsFileButton.addActionListener(
+        e -> {
+          String[] clipBoard = new String[1];
+          Aes256CbcEncryptedPassword[] clipPass = new Aes256CbcEncryptedPassword[1];
+          if (!passToString(clipBoard, clipPass)) {
+            return;
+          }
+
+          savePassToFile(
+              clipBoard[0],
+              clipPass[0],
+              ", when save pass to file",
+              encryptionAES256CheckBox.isSelected());
+        });
+  }
+
+  private void savePassToFile(
+      String toSaveString,
+      Aes256CbcEncryptedPassword toSavePass,
+      String callerId,
+      boolean toSaveStringIsXml) {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Specify a file to save");
+    if (toSaveStringIsXml) {
+      FileNameExtensionFilter filterXml = new FileNameExtensionFilter("XML FILES", "xml", "XML");
+      fileChooser.setFileFilter(filterXml);
+      FileNameExtensionFilter filterZip = new FileNameExtensionFilter("ZIP FILES", "zip", "ZIP");
+      fileChooser.setFileFilter(filterZip);
+    }
+
+    int userSelection = fileChooser.showSaveDialog(panelMain);
+
+    if (userSelection == JFileChooser.APPROVE_OPTION) {
+      File fileToSave = fileChooser.getSelectedFile();
+      if (fileToSave.exists() && !fileToSave.isFile()) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            "You should specify true file (not directory or something else)!",
+            "Error" + callerId,
+            JOptionPane.ERROR_MESSAGE);
+      } else if (toSaveStringIsXml
+          && (!(fileToSave.getName().toLowerCase().endsWith(".xml")
+              || fileToSave.getName().toLowerCase().endsWith(".zip")))) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            "You should specify \".xml\" or \".zip\" extension manually!",
+            "Error" + callerId,
+            JOptionPane.ERROR_MESSAGE);
+      } else {
+        try {
+          if (!toSaveStringIsXml
+              || (toSaveStringIsXml && fileToSave.getName().toLowerCase().endsWith(".xml"))) {
+            FileWriter fileWriter = new FileWriter(fileToSave);
+            fileWriter.write(toSaveString);
+            fileWriter.close();
+          } else {
+            byte[] data;
+            StringBuilder str;
+            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileToSave));
+            ZipEntry e;
+
+            e = new ZipEntry("meta.txt");
+            out.putNextEntry(e);
+            str = new StringBuilder();
+            str.append("{\n");
+            str.append("\t\"keyDerivationFunction\":\"");
+            str.append(toSavePass.keyDerivationFunction);
+            str.append("\",\n\t\"messageDigestFunction\":\"");
+            str.append(toSavePass.messageDigestFunction);
+            str.append("\"\n}");
+            data = str.toString().getBytes();
+            out.write(data, 0, data.length);
+            out.closeEntry();
+
+            e = new ZipEntry("iv.base64");
+            out.putNextEntry(e);
+            data = toSavePass.initializationVector.getBytes();
+            out.write(data, 0, data.length);
+            out.closeEntry();
+
+            e = new ZipEntry("salt.base64");
+            out.putNextEntry(e);
+            data = toSavePass.saltForKeyDerivationFunction.getBytes();
+            out.write(data, 0, data.length);
+            out.closeEntry();
+
+            e = new ZipEntry("data.enc.base64");
+            out.putNextEntry(e);
+            data = toSavePass.encryptedData.getBytes();
+            out.write(data, 0, data.length);
+            out.closeEntry();
+
+            out.close();
+          }
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(
+              panelMain, ex.toString(), "Exception" + callerId, JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }
+
+  private boolean passToString(String[] clipBoard, Aes256CbcEncryptedPassword[] pass) {
+    if (encryptionAES256CheckBox.isSelected()) {
+      if (!this.successfullEncryption) {
+        JOptionPane.showMessageDialog(
+            panelMain, "Password should be first successfully encrypted!");
+        return false;
+      }
+      pass[0] = new Aes256CbcEncryptedPassword();
+      assignAes256CbcEncryptedPassword(pass[0]);
+
+      try {
+        JAXBContext jaxbContext = JAXBContext.newInstance(Aes256CbcEncryptedPassword.class);
+        StringWriter result = new StringWriter();
+        jaxbContext.createMarshaller().marshal(pass[0], result);
+        clipBoard[0] = result.toString();
+      } catch (JAXBException ex) {
+        JOptionPane.showMessageDialog(
+            panelMain, ex.toString(), "Exception copy to Clipboard", JOptionPane.ERROR_MESSAGE);
+        return false;
+      }
+    } else {
+      clipBoard[0] = String.valueOf(prod);
+    }
+    return true;
   }
 
   private void assignAes256CbcEncryptedPassword(Aes256CbcEncryptedPassword data) {
@@ -1346,24 +1445,6 @@ public class Form1 {
     }
   }
 
-  private void acceptEntropy(EntropySequence entropySequence) {
-    if (entropySequence.isValid()) {
-      DefaultTableModel model = (DefaultTableModel) tableEntropySequences.getModel();
-      model.addRow(
-          new Object[] {entropySequence.getEntropySequenceSource().name(), entropySequence});
-
-      ((CardLayout) panelMain.getLayout()).first(panelMain);
-      ((CardLayout) panelMain.getLayout()).next(panelMain);
-      ((CardLayout) panelMain.getLayout()).next(panelMain);
-    } else {
-      JOptionPane.showMessageDialog(
-          panelMain,
-          "Specified entropy data is unusable. Try to input other data.",
-          "Unusable entropy data",
-          JOptionPane.INFORMATION_MESSAGE);
-    }
-  }
-
   private void assignTableOfPresetChars(TableOfPresetChars tableOfPresetChars) {
     List<PresetChars> list = new ArrayList<>();
 
@@ -1550,7 +1631,7 @@ public class Form1 {
     frame.setContentPane(myForm.panelMain);
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     frame.pack();
-    frame.setSize(frame.getWidth(), 410);
+    frame.setSize(frame.getWidth(), 460);
     frame.setLocationRelativeTo(null);
     frame.setVisible(true);
   }
