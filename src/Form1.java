@@ -1,8 +1,7 @@
-import com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
 import configuration.PresetChars;
 import configuration.TableOfPresetChars;
-import data.holder.EntropySequence;
-import data.holder.EntropySequence.EntropySequenceSource;
+import dataholder.EntropySequence;
+import dataholder.EntropySequence.EntropySequenceSource;
 import java.awt.CardLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -10,13 +9,15 @@ import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.BufferOverflowException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.CryptoPrimitive;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -25,6 +26,16 @@ import java.util.List;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.DestroyFailedException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -49,6 +60,7 @@ import sequence.radix.converter.SequenceRadixConverterFabricInteger;
 import special.data.UTF8_ENCODER;
 import special.data.UTF8_ENCODER.EncoderOverflowException;
 import special.math.Randomness;
+import special.security.OpenSSLDecryptor;
 
 public class Form1 {
 
@@ -56,9 +68,19 @@ public class Form1 {
   private static final int MAXIMUM_BINARY_DATA_TO_READ = 100000;
   private static final int MAXIMUM_BINARY_DATA_TO_PREVIEW = 1000;
   public static final int INTERMEDIATE_RADIX_SEQUENCE = 3;
+  public static final int PBKDF2Iterations = 1000000;
+  public static final int AESKeyLength = 256;
+  public static final String PBKDF_2_WITH_HMAC_SHA_256 = "PBKDF2WithHmacSHA256";
+  public static final String AES = "AES";
+  public static final String AES_CBC_PKCS5_PADDING = "AES/CBC/PKCS5Padding";
+  public static final String MD5 = "MD5";
+  public static final String SHA256 = "SHA256";
   private char[] aaa34349500f063 = new char[2];
+  private byte[] initializationVector = new byte[2];
+  private byte[] salt = new byte[2];
   private int totalaaa34349500f063 = 0;
   private boolean foreverUnsecure = false;
+  private boolean successfullEncryption = false;
   private char[] prod = new char[2];
   private File binaryFile;
   private byte[] binaryData;
@@ -146,7 +168,7 @@ public class Form1 {
   private JLabel aesComment2;
   private JLabel aesComment3;
   private JLabel aesComment4;
-  private JLabel aesComment5;
+  private JRadioButton SHA256KDFPKCS5v1RadioButton;
   private JLabel aesComment6;
 
   public Form1() {
@@ -505,15 +527,25 @@ public class Form1 {
           if (panelMain.getLayout() instanceof CardLayout) {
             ((CardLayout) panelMain.getLayout()).first(panelMain);
 
-            passwordProgressBar.setValue(0);
-            getMyPasswordButton.setEnabled(false);
-            this.totalaaa34349500f063 = 0;
-            clearWithRandom(new SecureRandom(), this.aaa34349500f063);
-            clearWithRandom(new SecureRandom(), this.prod);
-            foreverUnsecure = false;
+            viewPasswordCheckBox.setSelected(false);
+            encryptionAES256CheckBox.setSelected(false);
+            encodeWithBase64CheckBox.setSelected(false);
+
+            setAesVisibility(false);
+
             previewPassTextPane.setText("");
             passwordField1.setText("");
             passwordField2.setText("");
+
+            clearWithRandom(new SecureRandom(), this.aaa34349500f063);
+            clearWithRandom(new SecureRandom(), this.prod);
+
+            this.totalaaa34349500f063 = 0;
+            this.foreverUnsecure = false;
+            this.successfullEncryption = false;
+
+            passwordProgressBar.setValue(0);
+            getMyPasswordButton.setEnabled(false);
 
             DefaultTableModel model = (DefaultTableModel) tableEntropySequences.getModel();
             while (model.getRowCount() > 0) {
@@ -808,10 +840,7 @@ public class Form1 {
           }
           generatePasswordAction();
         });
-    viewPasswordCheckBox.addItemListener(
-        e -> {
-          generatePasswordAction();
-        });
+    viewPasswordCheckBox.addItemListener(e -> generatePasswordAction());
     encodeWithBase64CheckBox.addActionListener(e -> generatePasswordAction());
     MD5KDFPKCS5v1RadioButton.addActionListener(e -> generatePasswordAction());
     PBKDF2PKCS5v21RadioButton.addActionListener(e -> generatePasswordAction());
@@ -846,6 +875,7 @@ public class Form1 {
   }
 
   private void generatePasswordAction() {
+    this.successfullEncryption = false;
     if (encryptionAES256CheckBox.isSelected()) {
       if (!Arrays.equals(passwordField1.getPassword(), passwordField2.getPassword())) {
         previewPassTextPane.setText("Master password and confirm master password are different.");
@@ -857,25 +887,40 @@ public class Form1 {
       previewPassTextPane.setText("");
     }
 
-    clearWithRandom(new SecureRandom(), prod);
+    this.successfullEncryption = true;
+
+    clearWithRandom(new SecureRandom(), this.prod);
+    clearWithRandom(new SecureRandom(), this.salt);
+
     byte[] arr1 = new byte[2];
     byte[] arr2 = new byte[2];
+    byte[] arr3 = new byte[2];
+    byte[] arr4 = new byte[2];
     if (encryptionAES256CheckBox.isSelected()) {
       // byte routine
-    } else {
-      // char routine
-      if (encodeWithBase64CheckBox.isSelected()) {
-        // encode
-        arr1 = chars2bytes(this.aaa34349500f063.clone(), this.totalaaa34349500f063);
-        arr2 = Base64.getEncoder().encode(arr1);
-        prod = bytes2chars(arr2);
+      arr3 = chars2bytes(this.aaa34349500f063.clone(), this.totalaaa34349500f063);
+      arr4 = chars2bytes(passwordField1.getPassword().clone(), passwordField1.getPassword().length);
+      if (MD5KDFPKCS5v1RadioButton.isSelected()) {
+        arr1 = MD_KDFPKCS5v1Routine(arr3.clone(), arr4.clone(), MD5);
+      } else if (SHA256KDFPKCS5v1RadioButton.isSelected()) {
+        arr1 = MD_KDFPKCS5v1Routine(arr3.clone(), arr4.clone(), SHA256);
       } else {
-        prod = new char[totalaaa34349500f063];
-        System.arraycopy(this.aaa34349500f063, 0, this.prod, 0, totalaaa34349500f063);
+        arr1 = PBKDF2PKCS5v21Routine(arr3.clone(), passwordField1.getPassword().clone());
       }
+    } else {
+      arr1 = chars2bytes(this.aaa34349500f063.clone(), this.totalaaa34349500f063);
+    }
+    if (encodeWithBase64CheckBox.isSelected()) {
+      arr2 = Base64.getEncoder().encode(arr1);
+      prod = bytes2chars(arr2.clone());
+    } else {
+      prod = new char[totalaaa34349500f063];
+      System.arraycopy(this.aaa34349500f063, 0, this.prod, 0, totalaaa34349500f063);
     }
     clearWithRandom(new SecureRandom(), arr1);
     clearWithRandom(new SecureRandom(), arr2);
+    clearWithRandom(new SecureRandom(), arr3);
+    clearWithRandom(new SecureRandom(), arr4);
 
     if (viewPasswordCheckBox.isSelected()) {
       if (foreverUnsecure || encryptionAES256CheckBox.isSelected()) {
@@ -900,12 +945,129 @@ public class Form1 {
     }
   }
 
+  private byte[] PBKDF2PKCS5v21Routine(byte[] aaa, char[] masterPassword) {
+    byte[] ciphertext = new byte[0];
+    SecretKey tmp = null;
+    SecretKey secret = null;
+    try {
+      this.salt = new SecureRandom().generateSeed(8);
+
+      SecretKeyFactory factory = SecretKeyFactory.getInstance(PBKDF_2_WITH_HMAC_SHA_256);
+      KeySpec spec = new PBEKeySpec(masterPassword, this.salt, PBKDF2Iterations, AESKeyLength);
+
+      tmp = factory.generateSecret(spec);
+      secret = new SecretKeySpec(tmp.getEncoded(), AES);
+
+      Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5_PADDING);
+      cipher.init(Cipher.ENCRYPT_MODE, secret);
+
+      AlgorithmParameters params = cipher.getParameters();
+      this.initializationVector = params.getParameterSpec(IvParameterSpec.class).getIV();
+
+      ciphertext = cipher.doFinal(aaa);
+
+    } catch (NoSuchAlgorithmException
+        | InvalidKeySpecException
+        | NoSuchPaddingException
+        | IllegalBlockSizeException
+        | InvalidParameterSpecException
+        | BadPaddingException
+        | InvalidKeyException ex) {
+
+      this.successfullEncryption = false;
+      JOptionPane.showMessageDialog(
+          panelMain, ex.toString(), "Exception aes encryption (PBKDF2)", JOptionPane.ERROR_MESSAGE);
+    } finally {
+      try {
+        if (tmp != null) {
+          tmp.destroy();
+        }
+      } catch (DestroyFailedException ex) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            ex.toString(),
+            "Exception aes encryption (PBKDF2)",
+            JOptionPane.ERROR_MESSAGE);
+      }
+      try {
+        if (secret != null) {
+          secret.destroy();
+        }
+      } catch (DestroyFailedException ex) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            ex.toString(),
+            "Exception aes encryption (PBKDF2)",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    }
+
+    clearWithRandom(new SecureRandom(), aaa);
+    clearWithRandom(new SecureRandom(), masterPassword);
+
+    return ciphertext;
+  }
+
+  private byte[] MD_KDFPKCS5v1Routine(byte[] aaa, byte[] masterPassword, String nameMD) {
+    byte[] cipherText = new byte[0];
+    SecretKeySpec key = null;
+    try {
+      this.salt = new SecureRandom().generateSeed(8);
+
+      MessageDigest md = MessageDigest.getInstance(nameMD);
+      byte[][] keyAndIV = OpenSSLDecryptor.openSSLEVP(this.salt, masterPassword, md);
+      key = new SecretKeySpec(keyAndIV[OpenSSLDecryptor.INDEX_KEY], AES);
+      IvParameterSpec iv = new IvParameterSpec(keyAndIV[OpenSSLDecryptor.INDEX_IV]);
+
+      Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5_PADDING);
+      cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+
+      AlgorithmParameters params = cipher.getParameters();
+      this.initializationVector = params.getParameterSpec(IvParameterSpec.class).getIV();
+
+      cipherText = cipher.doFinal(aaa);
+
+    } catch (NoSuchAlgorithmException
+        | NoSuchPaddingException
+        | IllegalBlockSizeException
+        | InvalidParameterSpecException
+        | BadPaddingException
+        | InvalidKeyException
+        | InvalidAlgorithmParameterException ex) {
+      this.successfullEncryption = false;
+      JOptionPane.showMessageDialog(
+          panelMain,
+          ex.toString(),
+          "Exception aes encryption (" + nameMD + ")",
+          JOptionPane.ERROR_MESSAGE);
+    } finally {
+      try {
+        if (key != null) {
+          key.destroy();
+        }
+      } catch (DestroyFailedException ex) {
+        JOptionPane.showMessageDialog(
+            panelMain,
+            ex.toString(),
+            "Exception aes encryption (" + nameMD + ")",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    }
+
+    clearWithRandom(new SecureRandom(), aaa);
+    clearWithRandom(new SecureRandom(), masterPassword);
+
+    return cipherText;
+  }
+
   private char[] bytes2chars(byte[] arr) {
     char[] res = new char[arr.length];
 
     for (int i = 0; i < arr.length; i++) {
       res[i] = (char) arr[i];
     }
+
+    clearWithRandom(new SecureRandom(), arr);
 
     return res;
   }
@@ -936,6 +1098,7 @@ public class Form1 {
       UTF8_ENCODER.encodeArrayLoop(chArrMn, arr);
     } catch (EncoderOverflowException ignored) {
     } finally {
+      clearWithRandom(new SecureRandom(), chArr);
       clearWithRandom(new SecureRandom(), chArrMn);
     }
 
@@ -943,16 +1106,19 @@ public class Form1 {
   }
 
   private void setAesVisibility(boolean visible) {
-    aesComment1.setEnabled(visible);
-    aesComment4.setEnabled(visible);
-    aesComment5.setEnabled(visible);
-    aesComment6.setEnabled(visible);
-    aesComment7.setEnabled(visible);
+    // aesComment1.setEnabled(visible);
+    aesComment2.setEnabled(visible);
+    aesComment3.setEnabled(visible);
+    // aesComment4.setEnabled(visible);
+    // aesComment5.setEnabled(visible);
+    // aesComment6.setEnabled(visible);
+    // aesComment7.setEnabled(visible);
 
     passwordField1.setEnabled(visible);
     passwordField2.setEnabled(visible);
 
     MD5KDFPKCS5v1RadioButton.setEnabled(visible);
+    SHA256KDFPKCS5v1RadioButton.setEnabled(visible);
     PBKDF2PKCS5v21RadioButton.setEnabled(visible);
   }
 

@@ -39,7 +39,7 @@ public class UTF8_ENCODER {
 
         int var11 = sgp.parse(var10, var3, var4, var5);
         if (var11 < 0) {
-          if (sgp.error().isMalformed()) {
+          if (!sgp.error().isUnderflow()) {
             throw new EncoderOverflowException();
           }
           return;
