@@ -1,3 +1,5 @@
+package form1;
+
 import configuration.PresetChars;
 import configuration.TableOfPresetChars;
 import dataholder.EntropySequence;
@@ -1011,13 +1013,14 @@ public class Form1 {
   private byte[] MD_KDFPKCS5v1Routine(byte[] aaa, byte[] masterPassword, String nameMD) {
     byte[] cipherText = new byte[0];
     SecretKeySpec key = null;
+    byte[][] keyAndIV = null;
     try {
       this.salt = new SecureRandom().generateSeed(8);
 
       MessageDigest md = MessageDigest.getInstance(nameMD);
-      byte[][] keyAndIV = OpenSSLDecryptor.openSSLEVP(this.salt, masterPassword, md);
-      key = new SecretKeySpec(keyAndIV[OpenSSLDecryptor.INDEX_KEY], AES);
-      IvParameterSpec iv = new IvParameterSpec(keyAndIV[OpenSSLDecryptor.INDEX_IV]);
+      keyAndIV = OpenSSLDecryptor.openSSLEVP(this.salt, masterPassword, md);
+      key = new SecretKeySpec(keyAndIV[OpenSSLDecryptor.INDEX_KEY].clone(), AES);
+      IvParameterSpec iv = new IvParameterSpec(keyAndIV[OpenSSLDecryptor.INDEX_IV].clone());
 
       Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5_PADDING);
       cipher.init(Cipher.ENCRYPT_MODE, key, iv);
@@ -1056,6 +1059,14 @@ public class Form1 {
 
     clearWithRandom(new SecureRandom(), aaa);
     clearWithRandom(new SecureRandom(), masterPassword);
+    if (keyAndIV != null) {
+      if (keyAndIV[OpenSSLDecryptor.INDEX_KEY] != null) {
+        clearWithRandom(new SecureRandom(), keyAndIV[OpenSSLDecryptor.INDEX_KEY]);
+      }
+      if (keyAndIV[OpenSSLDecryptor.INDEX_IV] != null) {
+        clearWithRandom(new SecureRandom(), keyAndIV[OpenSSLDecryptor.INDEX_IV]);
+      }
+    }
 
     return cipherText;
   }

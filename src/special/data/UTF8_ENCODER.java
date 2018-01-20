@@ -1,12 +1,8 @@
 package special.data;
 
-import sun.nio.cs.Surrogate.Parser;
-
 public class UTF8_ENCODER {
 
   public static class EncoderOverflowException extends Exception {}
-
-  private static final Parser sgp = new Parser();
 
   // hardcoded utf-8 converter
   public static void encodeArrayLoop(char[] var3, byte[] var6) throws EncoderOverflowException {
@@ -37,11 +33,8 @@ public class UTF8_ENCODER {
         var6[var7++] = (byte) (128 | var10 & 63);
       } else if (Character.isSurrogate(var10)) {
 
-        int var11 = sgp.parse(var10, var3, var4, var5);
+        int var11 = parse(var10, var3, var4, var5);
         if (var11 < 0) {
-          if (!sgp.error().isUnderflow()) {
-            throw new EncoderOverflowException();
-          }
           return;
         }
 
@@ -64,5 +57,23 @@ public class UTF8_ENCODER {
         var6[var7++] = (byte) (128 | var10 & 63);
       }
     }
+  }
+
+  private static int parse(char c, char[] ia, int ip, int il) throws EncoderOverflowException {
+    assert (ia[ip] == c);
+    if (Character.isHighSurrogate(c)) {
+      if (il - ip < 2) {
+        return -1;
+      }
+      char d = ia[ip + 1];
+      if (Character.isLowSurrogate(d)) {
+        return Character.toCodePoint(c, d);
+      }
+      throw new EncoderOverflowException();
+    }
+    if (Character.isLowSurrogate(c)) {
+      throw new EncoderOverflowException();
+    }
+    return c;
   }
 }

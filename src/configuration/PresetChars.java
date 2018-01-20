@@ -16,21 +16,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class PresetChars {
 
-  private Boolean lowerCaseLettersCheckBox; // a b c ...
-  private Boolean upperCaseLettersCheckBox; // A B C ...
-  private Boolean digitsCheckBox; // 0 1 2 ...
-  private Boolean commercialAtCheckBox; // @
-  private Boolean underscoreCheckBox; // _
-  private Boolean dollarSignCheckBox; // $
-  private Boolean dotCheckBox; // .
-  private Boolean bracesCheckBox; // <> () [] {}
-  private Boolean specialCheckBox; // + - =
-  private Boolean customCharactersCheckBox;
+  public Boolean lowerCaseLettersCheckBox; // a b c ...
+  public Boolean upperCaseLettersCheckBox; // A B C ...
+  public Boolean digitsCheckBox; // 0 1 2 ...
+  public Boolean commercialAtCheckBox; // @
+  public Boolean underscoreCheckBox; // _
+  public Boolean dollarSignCheckBox; // $
+  public Boolean dotCheckBox; // .
+  public Boolean bracesCheckBox; // <> () [] {}
+  public Boolean specialCheckBox; // + - =
+  public Boolean customCharactersCheckBox;
 
   @XmlElementWrapper(name = "ListCustomCharacters")
-  private List<String> customCharacters;
+  public List<String> customCharacters;
 
-  private Integer minimalOccurences;
+  public Integer minimalOccurences;
 
   private static List<String> lowerCaseLetters;
   private static List<String> upperCaseLetters;

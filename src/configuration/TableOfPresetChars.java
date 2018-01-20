@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class TableOfPresetChars {
 
   @XmlElementWrapper(name = "ListTableOfPresetChars")
-  private List<PresetChars> tableOfPresetChars;
+  public List<PresetChars> tableOfPresetChars;
 
   public TableOfPresetChars() {
     tableOfPresetChars = new ArrayList<>();
