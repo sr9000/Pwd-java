@@ -8,8 +8,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jgoodies-forms" level="project" />
-    <orderEntry type="module" module-name="sequence-radix-converter" />
+    <orderEntry type="module" module-name="sequence-radix-converter" scope="RUNTIME" />
     <orderEntry type="library" name="javaws" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="javax.xml.bind:jaxb-api:2.3.0" level="project" />
+    <orderEntry type="module" module-name="sequence-radix-converter" />
   </component>
 </module>

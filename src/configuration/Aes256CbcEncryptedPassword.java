@@ -12,4 +12,6 @@ public class Aes256CbcEncryptedPassword {
   public String initializationVector;
   public String saltForKeyDerivationFunction;
   public String encryptedData;
+  public Integer keyDerivationIterations;
+  public final Integer keyLength = 256;
 }

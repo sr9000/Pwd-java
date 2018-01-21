@@ -964,6 +964,10 @@ public class Form1 {
             str.append(toSavePass.keyDerivationFunction);
             str.append("\",\n\t\"messageDigestFunction\":\"");
             str.append(toSavePass.messageDigestFunction);
+            str.append("\",\n\t\"keyDerivationIterations\":\"");
+            str.append(toSavePass.keyDerivationIterations);
+            str.append("\",\n\t\"keyLength\":\"");
+            str.append(toSavePass.keyLength);
             str.append("\"\n}");
             data = str.toString().getBytes();
             out.write(data, 0, data.length);
@@ -1032,12 +1036,15 @@ public class Form1 {
     if (MD5KDFPKCS5v1RadioButton.isSelected()) {
       data.keyDerivationFunction = EVP_BYTES_TO_KEY;
       data.messageDigestFunction = MD5;
+      data.keyDerivationIterations = 1;
     } else if (SHA256KDFPKCS5v1RadioButton.isSelected()) {
       data.keyDerivationFunction = EVP_BYTES_TO_KEY;
       data.messageDigestFunction = SHA256;
+      data.keyDerivationIterations = 1;
     } else {
       data.keyDerivationFunction = PBKDF2;
       data.messageDigestFunction = HMAC_SHA256;
+      data.keyDerivationIterations = PBKDF2Iterations;
     }
   }
 
