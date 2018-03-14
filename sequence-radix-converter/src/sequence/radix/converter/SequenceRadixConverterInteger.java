@@ -159,6 +159,17 @@ public class SequenceRadixConverterInteger
     final BigInteger dstMultiplier = new BigInteger(dstRadix.toString(), 10);
     final BigInteger one = new BigInteger("1", 10);
 
+    // special check
+    if (dstRadix == 1) {
+      maxSrcSequenceLenToConvert = 1;
+      sortedConvertOptionsKeys.add(maxSrcSequenceLenToConvert);
+      convertOptions.put(
+              maxSrcSequenceLenToConvert,
+              new SubsequenceConvertOption(
+                      maxSrcSequenceLenToConvert, MAX_ANALYZED_SEQUENCE_LEN, one));
+      return this;
+    }
+
     // Algorithm values
     double lastOptimalFitnessValue = 0;
     BigInteger srcNumber = one;

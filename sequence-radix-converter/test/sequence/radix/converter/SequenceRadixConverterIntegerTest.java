@@ -5,7 +5,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.Test;
+
+import org.junit.Test;
+//import org.junit.jupiter.api.Test;
 
 class SequenceRadixConverterIntegerTest {
 
