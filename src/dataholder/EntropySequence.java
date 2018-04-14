@@ -81,10 +81,12 @@ public class EntropySequence {
     }
 
     List<Character> list =
-        frq.subList(uniformCoords.getKey(), uniformCoords.getValue())
-            .stream()
-            .map(Entry::getKey)
-            .collect(Collectors.toList());
+            new ArrayList<>(
+                    frq.subList(uniformCoords.getKey(), uniformCoords.getValue())
+                            .stream()
+                            .map(Entry::getKey)
+                            .collect(Collectors.toList())
+            );
 
     java.util.Collections.shuffle(list);
     Map<Character, Integer> chMap = new Hashtable<>();

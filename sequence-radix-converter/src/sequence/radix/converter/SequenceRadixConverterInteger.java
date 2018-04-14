@@ -63,13 +63,13 @@ public class SequenceRadixConverterInteger
         break;
       }
       takeNumber++;
-      result = collapseList(srcSequence.subList(0, takeNumber));
+      result = collapseList(new ArrayList<>(srcSequence.subList(0, takeNumber)));
     } while (result.size() < targetCount);
     for (int i = 0; i < takeNumber; i++) {
       srcSequence.remove(0);
     }
     if (result.size() > targetCount) {
-      result = result.subList(0, targetCount);
+      result = new ArrayList<>(result.subList(0, targetCount));
     }
     return result;
   }
@@ -97,7 +97,7 @@ public class SequenceRadixConverterInteger
       }
       // take srcValues and convert option
       SubsequenceConvertOption convertOption = convertOptions.get(numberOfSrcValuesToTake);
-      List<Integer> takenSrcValues = srcValuesList.subList(0, numberOfSrcValuesToTake);
+      List<Integer> takenSrcValues = new ArrayList<>(srcValuesList.subList(0, numberOfSrcValuesToTake));
 
       // compute src number
       BigInteger srcNumber = zero;
@@ -107,7 +107,7 @@ public class SequenceRadixConverterInteger
       // convert number if it is convertible
       if (srcNumber.compareTo(convertOption.maxConvertibleValue) <= 0) {
         // erase elements from list
-        srcValuesList = srcValuesList.subList(numberOfSrcValuesToTake, srcValuesList.size());
+        srcValuesList = new ArrayList<>(srcValuesList.subList(numberOfSrcValuesToTake, srcValuesList.size()));
         index += numberOfSrcValuesToTake;
         // convert sequence
         for (int i = 0; i < convertOption.dstSequenceLength; ++i) {
@@ -119,7 +119,7 @@ public class SequenceRadixConverterInteger
         srcValuesList.remove(0);
       }
     }
-    return result;
+      return result;
   }
 
   @Override
@@ -157,6 +157,7 @@ public class SequenceRadixConverterInteger
     // Constants
     final BigInteger srcMultiplier = new BigInteger(srcRadix.toString(), 10);
     final BigInteger dstMultiplier = new BigInteger(dstRadix.toString(), 10);
+    final BigInteger monster = new BigInteger("99999999999999999999999999999999999999999999999999999999999", 10);
     final BigInteger one = new BigInteger("1", 10);
 
     // special check
@@ -166,7 +167,7 @@ public class SequenceRadixConverterInteger
       convertOptions.put(
               maxSrcSequenceLenToConvert,
               new SubsequenceConvertOption(
-                      maxSrcSequenceLenToConvert, MAX_ANALYZED_SEQUENCE_LEN, one));
+                      maxSrcSequenceLenToConvert, MAX_ANALYZED_SEQUENCE_LEN, monster));
       return this;
     }
 
